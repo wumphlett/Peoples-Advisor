@@ -1,0 +1,41 @@
+Optional instrument flag in backtest/history
+Settings validation
+standardize abc input and usage
+Set a set code standard the fucking function(
+    things, things, things
+)
+history alias
+HTTP CONNECTION ERRORS
+Only create control thread if needed
+oanda api testing 6/32 0/1
+order or size? consistent language
+store all data in pa/data
+make subs direct????
+Steal attributes of some events to directly make new ones and allow custom data on events
+All non flag vars on deployment?
+How to do deployment???
+Collect back-test data as running live?
+Encode flag in settings that lets you store data in base 64 to save space
+Make the broker wrapper better
+Deploy command
+Live flag in deploy command or settings.py?
+Project dependency manager
+Cool terminal colors and warnings
+Make colors configurable in settings.py
+Rewrite method headers with proper formatting
+Docstrings add enter """
+things
+"""
+Terminalizer in the readme
+FULLY VALIDATE ALL POSSIBLE USER INPUTS
+Conditional completion
+author string in
+FUCK IT TYPE EVERYTHING
+USE THE OPTIONAL THING IN TYPING
+ABSTRACT EVERYTHING TO ONE USE
+ESPECIALLY THAT CLI LMAO
+Save off backtesting data for analysis
+Analysis of live data too?
+Standardize data size/file
+better backtest thread thing
+state starting PA with what strategies and live/paper on the message

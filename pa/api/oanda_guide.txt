@@ -1,0 +1,180 @@
+=== Oanda API Wrapper Guide ===
+People's Advisor includes a custom Oanda API Wrapper to allow you to easily invoke the Oanda API with ease. It's
+intention is to mirror the endpoints and their usage directly and make the API available to you in your python scripts.
+
+
+--- Usage ---
+# Initializing the API wrapper is done as follows
+api = API(live=False, auth=<api_token>)
+# live is a flag that controls whether api calls that would create/effect orders should be done on your paper (False)
+# account or your live (True) account.
+# auth is where you pass in your api token. This is obtained on the oanda website under your account settings
+
+# An example api call
+response = api.get_accounts()
+# the response of any api calls will always be a dictionary (unless the docs specify the api call returns a generator).
+# The specific breakdown of what each api call will return is beyond the scope of this guide and can be found on the
+# oanda documentation website or through experimenting with a non-live API wrapper instance
+
+# Placing an order request
+order_request = api.create_order(MarketOrderRequest('EUR_USD', units=1000))
+-------------
+
+
+Below are the definitions of objects and variables referenced in the api wrapper. This is not a complete list of every
+oanda api definition (for that see https://developer.oanda.com/rest-live-v20/introduction/), but this contains all of
+the definitions needed to operate the provided oanda api wrapper.
+
+Definitions given in the form <Name> [<Value, <Value>, <Value>] offer acceptable values for the given name. Select
+one value from the list that describes your intended behavior.
+
+
+--- Primitives ---
+AcceptDatetimeFormat ['RFC3339', 'UNIX']: This is specified upon api initialization. This controls what datetime
+    standard you would like to communicate to and from the api with. By default, this is 'RFC3339'.
+    'RFC3339': The RFC-3339 standard
+        ex. '2020-01-01T00:00:00.000000000Z'
+    'UNIX': The Unix Epoch time (with nano-seconds)
+        ex. '1578088790.000000000'
+
+DateTime: A string representing time, either in the RFC 3339 standard or the Unix Epoch time standard. Which standard
+    you use depends on what standard you have selected for your api wrapper instance.
+    NOTE: If you plan to use python's datetime module, you may find the api methods oanda_time_to_datetime and
+        datetime_to_oanda_time helpful as they will convert between each other and use the time standard you selected.
+
+InstrumentName: A string representing a pair in the format <base currency>_<quote currency>.
+    ex. 'EUR_USD'
+
+
+--- Instrument ---
+CandlestickGranularity ['S5', 'S10', 'S15', 'S30', 'M1', 'M2', 'M4', 'M5', 'M10', 'M15', 'M30', 'H1', 'H2', 'H3',
+                        'H4', 'H6', 'H8', 'H12', 'D', 'W', 'M']: The granularity of a candlestick.
+    'S5': 5 second candlesticks, minute alignment
+    'S10': 10 second candlesticks, minute alignment
+    'S15': 15 second candlesticks, minute alignment
+    'S30': 30 second candlesticks, minute alignment
+    'M1': 1 minute candlesticks, minute alignment
+    'M2': 2 minute candlesticks, hour alignment
+    'M4': 4 minute candlesticks, hour alignment
+    'M5': 5 minute candlesticks, hour alignment
+    'M10': 10 minute candlesticks, hour alignment
+    'M15': 15 minute candlesticks, hour alignment
+    'M30': 30 minute candlesticks, hour alignment
+    'H1': 1 hour candlesticks, hour alignment
+    'H2': 2 hour candlesticks, day alignment
+    'H3': 3 hour candlesticks, day alignment
+    'H4': 4 hour candlesticks, day alignment
+    'H6': 6 hour candlesticks, day alignment
+    'H8': 8 hour candlesticks, day alignment
+    'H12': 12 hour candlesticks, day alignment
+    'D': 1 day candlesticks, day alignment
+    'W': 1 week candlesticks, aligned to start of week
+    'M': 1 month candlesticks, aligned to first day of the month
+
+WeeklyAlignment ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']: The day of the week to
+    use for candlesticks that have weekly alignment.
+    'Monday': Monday
+    'Tuesday': Tuesday
+    'Wednesday': Wednesday
+    'Thursday': Thursday
+    'Friday': Friday
+    'Saturday': Saturday
+    'Sunday': Sunday
+
+
+--- Order ---
+OrderID: An int representing an order id.
+    ex. 1234
+
+OrderRequest: This is the object invoked when requesting an order. OrderRequest is an abstract class invoked by
+    MarketOrderRequest, LimitOrderRequest, StopOrderRequest, MarketIfTouchedOrderRequest, TakeProfitOrderRequest,
+    StopLossOrderRequest, GuaranteedStopLossOrderRequest, and TrailingStopOrderRequest. You will use one of these
+    subclasses to describe the order you are trying to place.
+        NOTE: The actual class OrderRequest is an abstract class not meant to be used directly. Instead use any of the
+            listed subclasses that all fall under the heading of OrderRequest
+
+TimeInForce ['GTC', 'GTD', 'GFD', 'FOK', 'IOC']: The time-in-force of an order. This describes how long an order should
+    remain pending before it is automatically cancelled.
+    'GTC': Good Til Cancelled
+    'GTD': Good Til Date (Must provide a date through the corresponding gtd_time variable)
+    'GFD': Good For Day (Will be canceled at 5pm New York time)
+    'FOK': Filled or Killed (Order must be immediately filled or killed)
+    'IOC': Immediately Partially Filled or Killed (Order must be immediately partially filled or killed)
+
+OrderPositionFill ['OPEN_ONLY', 'REDUCE_FIRST', 'REDUCE_ONLY', 'DEFAULT']: Specification of how positions in the account
+    are modified when the order is filled.
+    'OPEN_ONLY': When the order is filled, only allow positions to be opened or extended
+    'REDUCE_FIRST': When the order is filled, always fully reduce an existing position before opening a new position
+    'REDUCE_ONLY': When the order is filled, only reduce an existing position
+    'DEFAULT': When the order is filled, use REDUCE_FIRST behavior for non-client hedging accounts, and OPEN_ONLY for
+        client hedging accounts
+
+OrderTriggerCondition ['DEFAULT', 'INVERSE', 'BID', 'MID', 'ASK']: Specification of which price component should be used
+    when determining if an order should be triggered and filled.
+    'DEFAULT': Trigger in the natural way (Use ask price for long orders, bid price for short orders)
+    'INVERSE': Trigger opposite of the natural way (Use bid price for long orders, ask price for short orders)
+    'BID': Trigger an order by comparing to the bid price regardless of short or long
+    'MID': Trigger an order by comparing to the mid price regardless of short or long
+    'ASK': Trigger an order by comparing to the ask price regardless of short or long
+
+OrderStateFilter ['PENDING', 'FILLED', 'TRIGGERED', 'CANCELLED', 'ALL']: A state to filter requested orders by.
+    'PENDING': The orders that are currently pending execution
+    'FILLED': The orders that have been filled
+    'TRIGGERED': The orders that have been triggered
+    'CANCELLED': The orders that have been cancelled
+    'ALL': The orders that are in any of the possible states listed above
+
+
+--- Trade ---
+TradeID: An int representing a trade id.
+    ex. 1234
+
+
+--- Transaction ---
+TransactionID: An int representing a transaction id.
+    ex. 1234
+
+TakeProfitDetails: An object that describes the details of a take profit order.
+    ex. TakeProfitDetails(price=1.23456, time_in_force='GTC')
+    ex. TakeProfitDetails(price=1.23456, 'GTD', gtd_time='2020-01-01T00:00:00.000000000Z')
+    see more in-depth documentation on oanda.py at the object definition
+
+StopLossDetails: An object that describes the details of a stop loss order.
+    NOTE: price and distance are both parameters available in StopLossDetails, only one of these may be specified.
+    ex. StopLossDetails(price=1.23456)
+    ex. StopLossDetails(distance=0.00010, time_in_force='GTC')
+    see more in-depth documentation on oanda.py at the object definition
+
+TrailingStopLossDetails: An object that describes the details of a trailing stop loss order.
+    ex. TrailingStopLossDetails(distance=0.00010)
+    see more in-depth documentation on oanda.py at the object definition
+
+GuaranteedStopLossDetails: An object that describes the details of a guaranteed stop loss order.
+    NOTE: price and distance are both parameters available in StopLossDetails, only one of these may be specified.
+    ex. GuaranteedStopLossDetails(price=1.23456)
+    ex. GuaranteedStopLossDetails(distance=0.00010, time_in_force='GTC')
+    see more in-depth documentation on oanda.py at the object definition
+
+TransactionFilter [A lot of available states]: A state to filter requested transactions by.
+    There are a lot of these and would double the definitions portion of this guide if they were included.
+    https://developer.oanda.com/rest-live-v20/transaction-df/#collapse_definition_77
+
+
+--- Pricing ---
+PriceValue: Decimal number representing a price.
+    ex. 1.21548
+
+PricingComponent: A string containing any combination of the characters 'M' (midpoint candles), 'B' (bid candles),
+    and 'A' (ask candles).
+    ex. 'M'
+    ex. 'BM'
+
+CandleSpecification: A string in the following format <InstrumentName>:<CandlestickGranularity>:<PricingComponent>.
+    ex. 'EUR_USD:S10:BM'
+
+
+--- Misc ---
+Client Extensions: Extensions that allow you to attach custom data to transactions.
+    NOTE: DO NOT INTERACT WITH OR USE CLIENT EXTENSIONS IF YOUR ACCOUNT IS ASSOCIATED WITH MT4
+    see more in-depth documentation on oanda.py at the object definition
+

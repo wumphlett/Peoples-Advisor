@@ -1,54 +1,41 @@
+import pytest
 from pa.settings import api_token
-from pa.api import oanda
+from pa.api.oanda_api import API, OandaError
 
 
 class TestOandaAPI:
     @classmethod
     def setup_class(cls):
-        cls.api = oanda.API(live=False, auth=api_token)
+        cls.api = API(live=False, auth=api_token)
 
     def test_accounts(self):
-        response = self.api.accounts()
+        response = self.api.get_accounts()
         assert response.get('accounts')
 
     def test_account_details(self):
-        response = self.api.account_details()
+        response = self.api.get_account_details()
         assert response.get('account')
 
     def test_account_summary(self):
-        response = self.api.account_summary()
+        response = self.api.get_account_summary()
         assert response.get('account')
 
     def test_account_instruments(self):
-        response = self.api.account_instruments()
+        response = self.api.get_account_instruments()
+        assert response.get('instruments')
+        response = self.api.get_account_instruments(['EUR_USD', 'GBP_USD'])
         assert response.get('instruments')
 
-    def test_account_configure(self):
-        response = self.api.account_details()
-        margin_rate = response['account']['marginRate']
-        response = self.api.account_configure(configure={'marginRate': margin_rate})
-        assert response.get('clientConfigureTransaction')
-        configured_rate = response.get('clientConfigureTransaction').get('marginRate')
-        assert margin_rate == configured_rate
-
     def test_account_changes(self):
-        response = self.api.account_changes()
-        assert response.get('changes').get('transactions')
+        last_transaction_id = self.api.get_transactions()['lastTransactionID']
+        response = self.api.get_account_changes(last_transaction_id)
+        assert response.get('changes')
 
-    def test_instrument_candles(self): # TODO bolster test
-        response = self.api.instrument_candles('AUD_USD', count=400)
-        assert response.get('candles')
-
-    def test_instrument_order_book(self):
-        response = self.api.instrument_order_book('AUD_USD')
-        assert response.get('orderBook')
-
-    def test_instrument_position_book(self):
-        response = self.api.instrument_position_book('AUD_USD')
-        assert response.get('positionBook')
-
-
-
-if __name__ == '__main__':
-    test_api = oanda.API(live=False, auth=api_token)
-    print(test_api.instrument_candles('AUD_USD', count=500))
+    def test_configure_account(self):
+        with pytest.raises(OandaError):
+            self.api.configure_account()
+        response = self.api.get_account_details()
+        margin_rate = response['account']['marginRate']
+        alias = response['account']['alias']
+        response = self.api.configure_account(margin_rate=margin_rate, alias=alias)
+        assert response.get('clientConfigureTransaction')
