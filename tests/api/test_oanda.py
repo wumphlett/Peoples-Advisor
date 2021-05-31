@@ -1,12 +1,12 @@
 import pytest
-from pa.settings import api_token
+from pa.settings import API_TOKEN
 from pa.api.oanda_api import API, OandaError
 
 
 class TestOandaAPI:
     @classmethod
     def setup_class(cls):
-        cls.api = API(live=False, auth=api_token)
+        cls.api = API(live=False, auth=API_TOKEN)
 
     def test_accounts(self):
         response = self.api.get_accounts()

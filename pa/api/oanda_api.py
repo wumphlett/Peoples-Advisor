@@ -1753,7 +1753,7 @@ class OandaApi:
         with stream as stream:
             for transaction in stream.iter_lines():
                 transaction = json.loads(transaction.decode("utf-8"))
-                yield transaction  # TODO Further sanitization
+                yield transaction
 
     def get_candles(
         self,

@@ -1,27 +1,26 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
-from typing import List
 
 base_path = Path(__file__).parents[1] / "data" / "history"
 
 
-def standard_file_name(instruments: List[str], from_time: datetime, to_time: datetime):
-    file_name = from_time.strftime("%Y.%m.%d") + "-" + to_time.strftime("%Y.%m.%d")
-    file_name += "[" + "-".join(instruments) + "]" + ".txt"
-    return file_name
+def standard_filename(from_time: datetime, to_time: datetime, instruments):
+    filename = from_time.strftime("%Y.%m.%d") + "-" + to_time.strftime("%Y.%m.%d")
+    filename += "[" + "-".join(instruments) + "]" + ".txt"
+    return filename
 
 
-def history_file_path(file_name: str):
-    history_path = base_path / file_name
+def history_filepath(filename: str):
+    history_path = base_path / filename
     if history_path.is_file():
         history_path.unlink()
     return history_path
 
 
-def file_size(file_path):
+def filesize(filepath):
     count = 0
-    for _ in open(file_path):
+    for _ in open(filepath):
         count += 1
         yield count
     return count

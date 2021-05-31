@@ -4,8 +4,8 @@ from datetime import datetime
 import requests
 
 """
-The functions here make use of webscraping oanda and do not use the officially provided oanda api
-   Use at your own risk
+The functions here make use of webscraping oanda and do not use the official oanda api
+Use at your own risk
 """
 
 

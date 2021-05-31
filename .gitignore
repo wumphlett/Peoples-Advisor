@@ -130,3 +130,9 @@ dmypy.json
 
 # pycharm
 .idea/
+
+# People's Advisor
+pa/data/**/*
+pa/settings.py
+pa/TODO.txt
+sandbox.py

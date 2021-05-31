@@ -20,25 +20,20 @@ from prompt_toolkit.shortcuts.progress_bar import formatters
 from prompt_toolkit.styles import Style
 
 from pa.backtest.backtest import get_historical_gen, get_backtesting_gen
-from pa.backtest.common import file_size
-from pa.backtest.common import standard_file_name as history_file_name
+from pa.backtest.common import filesize
 from pa.control.control import Control
 from pa.event.event import StartEvent, StopEvent, ExitEvent
-from pa.settings import color, instruments, live_strategies, backtest_strategies
-
-style = Style.from_dict(
-    {
-        "red": "#ff3333",
-        "green": "#c2d94c",
-        "orange": "#ff8f40",
-        "blue": "#59c2ff",
-        "yellow": "#ffee99",
-        "cyan": "#95e6cb",
-        "gray": "#b3b1ad",
-        "dark-gray": "#4d5566",
-        "bgbox": "bg:#4d5566",
-    }
+from pa.settings import (
+    LIVE,
+    LIVE_STRATEGIES,
+    BACKTEST_STRATEGIES,
+    TERMINAL_COLORS,
+    STYLE,
 )
+
+
+if TERMINAL_COLORS:
+    style = Style.from_dict(STYLE)
 
 TRUE_COLOR = ColorDepth.TRUE_COLOR
 
@@ -57,7 +52,8 @@ splash_screen = """\n \
     |   _   ||       | |     | |   |  _____| ||       ||   |  | |
     |___|    |_______||_______||___|    |_______||_______|     |_______| \
     |__| |__||______|   |___|  |___| |_______||_______||___|  |_|
-
+    \n                                                                   \
+                                 (github.com/Wumphlett/Peoples-Advisor)
     """
 
 datetime_pattern = (
@@ -99,14 +95,13 @@ class HistoryCompleter(Completer):
             history_files = Path(__file__).parents[1] / "data" / "history"
             if not history_files.is_dir():
                 history_files.mkdir()
-            history_files = [his_file.name for his_file in history_files.iterdir()]
-            for his_file in history_files:
+            for his_file in [his_file.name for his_file in history_files.iterdir()]:
                 if his_file.startswith(word):
-                    if color:
+                    if TERMINAL_COLORS:
                         yield Completion(
                             his_file,
                             start_position=-len(word),
-                            style="class:yellow,bgbox",
+                            style="class:variable,completionbox",
                         )
                     else:
                         yield Completion(
@@ -152,11 +147,11 @@ class NestedCLiCompleter(Completer):
                 "help",
             ]:
                 if command.startswith(word):
-                    if color:
+                    if TERMINAL_COLORS:
                         yield Completion(
                             command,
                             start_position=-len(word),
-                            style="class:green,bgbox",
+                            style="class:command,completionbox",
                         )
                     else:
                         yield Completion(
@@ -181,15 +176,15 @@ class CliLexer(Lexer):
                     "deploy",
                     "help",
                 ]:
-                    line.append(("class:green", token))
+                    line.append(("class:command", token))
                 elif re.match(datetime_pattern, token):
-                    line.append(("class:yellow", token))
+                    line.append(("class:variable", token))
                 elif token in allowed_grans:
-                    line.append(("class:yellow", token))
+                    line.append(("class:variable", token))
                 elif token in history_files:
-                    line.append(("class:yellow", token))
+                    line.append(("class:variable", token))
                 elif re.match("-[a-zA-Z]", token):
-                    line.append(("class:blue", token))
+                    line.append(("class:flag", token))
                 else:
                     line.append(("", token))
                 line.append(("", " "))
@@ -202,7 +197,15 @@ class CLI:
     def __init__(self):
         self.parser = argparse.ArgumentParser(prog="peoples_advisor_usage")
         subparsers = self.parser.add_subparsers(dest="command")
-        subparsers.add_parser("start", usage="start_usage")
+        start = subparsers.add_parser("start", usage="start_usage")
+        start.add_argument(
+            "-y",
+            "--yes",
+            dest="yes",
+            action="store",
+            default=False,
+            type=bool,
+        )
         subparsers.add_parser("stop", usage="stop_usage")
         subparsers.add_parser("exit", usage="exit_usage")
         history = subparsers.add_parser("history", usage="history_usage")
@@ -223,10 +226,10 @@ class CLI:
         self.session = PromptSession()
         self.exit_flag = False
 
-        control = Control(live_strategies[0], live_strategies[1])
-        self.control_thread = Thread(target=control.run, daemon=True)
-        self.run_flag = control.run_flag
-        self.events = control.events
+        self.control = Control(LIVE_STRATEGIES[0], LIVE_STRATEGIES[1])
+        self.control_thread = Thread(target=self.control.run, daemon=True)
+        self.run_flag = self.control.run_flag
+        self.events = self.control.events
 
     @staticmethod
     def cli_datetime(datetime_string):
@@ -279,52 +282,52 @@ class CLI:
 
     @staticmethod
     def peoples_advisor_usage():
-        if color:
+        if TERMINAL_COLORS:
             color_start_usage = FormattedText(
                 [
                     ("", "\n    "),
-                    ("class:cyan", "Usage"),
+                    ("class:info", "Usage"),
                     ("", ": "),
-                    ("class:gray", "pa> "),
+                    ("class:prompt", "pa> "),
                     ("", "{"),
-                    ("class:green", "start"),
+                    ("class:command", "start"),
                     ("", ", "),
-                    ("class:green", "stop"),
+                    ("class:command", "stop"),
                     ("", ", "),
-                    ("class:green", "exit"),
+                    ("class:command", "exit"),
                     ("", ", "),
-                    ("class:green", "history"),
+                    ("class:command", "history"),
                     ("", ", "),
-                    ("class:green", "backtest"),
+                    ("class:command", "backtest"),
                     ("", ", "),
-                    ("class:green", "deploy"),
+                    ("class:command", "deploy"),
                     ("", ", "),
-                    ("class:green", "help"),
+                    ("class:command", "help"),
                     ("", "} ..."),
                     (
                         "",
                         "\n      These commands allow you directly control People's Advisor",
                     ),
                     ("", "\n\n    Available Commands:"),
-                    ("class:green", "\n      start"),
+                    ("class:command", "\n      start"),
                     (
                         "",
                         "\tStart People's Advisor using the settings provided in settings.py",
                     ),
-                    ("class:green", "\n      stop"),
+                    ("class:command", "\n      stop"),
                     ("", "\tStop People's Advisor"),
-                    ("class:green", "\n      exit"),
+                    ("class:command", "\n      exit"),
                     ("", "\tExit People's Advisor"),
-                    ("class:green", "\n      history"),
+                    ("class:command", "\n      history"),
                     ("", "\tGather historical data for backtesting"),
-                    ("class:green", "\n      backtest"),
+                    ("class:command", "\n      backtest"),
                     ("", "\tBacktest the algorithms provided in settings.py"),
-                    ("class:green", "\n      deploy"),
+                    ("class:command", "\n      deploy"),
                     (
                         "",
                         "\tDeploy the algorithms provided in settings.py on a paper or live account",
                     ),
-                    ("class:green", "\n      help"),
+                    ("class:command", "\n      help"),
                     ("", "\tDisplay this help message\n"),
                 ]
             )
@@ -348,15 +351,17 @@ class CLI:
 
     @staticmethod
     def start_usage():
-        if color:
+        if TERMINAL_COLORS:
             color_start_usage = FormattedText(
                 [
                     ("", "\n    "),
-                    ("class:cyan", "Usage"),
+                    ("class:info", "Usage"),
                     ("", ": "),
-                    ("class:green", "start"),
+                    ("class:command", "start"),
                     ("", " ["),
-                    ("class:blue", "-h"),
+                    ("class:flag", "-h"),
+                    ("", ", "),
+                    ("class:flag", "-y"),
                     ("", "]"),
                     (
                         "",
@@ -364,31 +369,39 @@ class CLI:
                     ),
                     ("", "\n\n    Optional Arguments:"),
                     ("", "\n      "),
-                    ("class:blue", "-h"),
+                    ("class:flag", "-y"),
                     ("", ", "),
-                    ("class:blue", "--help"),
+                    ("class:flag", "--yes"),
+                    ("", "   Do not prompt for confirmation when running live"),
+                    ("", "\n      "),
+                    ("class:flag", "-h"),
+                    ("", ", "),
+                    ("class:flag", "--help"),
                     ("", "  Display this help message\n"),
                 ]
             )
             print(color_start_usage, style=style, color_depth=TRUE_COLOR)
         else:
-            start_usage = "\n    Usage: start [-h]"
+            start_usage = "\n    Usage: start [-h, -y]"
             start_usage += "\n      Start People's Advisor using the settings provided in settings.py"
             start_usage += "\n\n    Optional Arguments:"
+            start_usage += (
+                "\n      -y, --yes   Do not prompt for confirmation when running live"
+            )
             start_usage += "\n      -h, --help  Display this help message\n"
             print(start_usage)
 
     @staticmethod
     def stop_usage():
-        if color:
+        if TERMINAL_COLORS:
             color_stop_usage = FormattedText(
                 [
                     ("", "\n    "),
-                    ("class:cyan", "Usage"),
+                    ("class:info", "Usage"),
                     ("", ": "),
-                    ("class:green", "stop"),
+                    ("class:command", "stop"),
                     ("", " ["),
-                    ("class:blue", "-h"),
+                    ("class:flag", "-h"),
                     ("", "]"),
                     ("", "\n      Stop People's Advisor"),
                     (
@@ -397,9 +410,9 @@ class CLI:
                     ),
                     ("", "\n\n    Optional Arguments:"),
                     ("", "\n      "),
-                    ("class:blue", "-h"),
+                    ("class:flag", "-h"),
                     ("", ", "),
-                    ("class:blue", "--help"),
+                    ("class:flag", "--help"),
                     ("", "  Display this help message\n"),
                 ]
             )
@@ -414,15 +427,15 @@ class CLI:
 
     @staticmethod
     def exit_usage():
-        if color:
+        if TERMINAL_COLORS:
             color_exit_usage = FormattedText(
                 [
                     ("", "\n    "),
-                    ("class:cyan", "Usage"),
+                    ("class:info", "Usage"),
                     ("", ": "),
-                    ("class:green", "exit"),
+                    ("class:command", "exit"),
                     ("", " ["),
-                    ("class:blue", "-h"),
+                    ("class:flag", "-h"),
                     ("", "]"),
                     ("", "\n      Exit People's Advisor"),
                     (
@@ -431,9 +444,9 @@ class CLI:
                     ),
                     ("", "\n\n    Optional Arguments:"),
                     ("", "\n      "),
-                    ("class:blue", "-h"),
+                    ("class:flag", "-h"),
                     ("", ", "),
-                    ("class:blue", "--help"),
+                    ("class:flag", "--help"),
                     ("", "  Display this help message\n"),
                 ]
             )
@@ -448,19 +461,19 @@ class CLI:
 
     @staticmethod
     def history_usage():
-        if color:
+        if TERMINAL_COLORS:
             color_history_usage = FormattedText(
                 [
                     ("", "\n    "),
-                    ("class:cyan", "Usage"),
+                    ("class:info", "Usage"),
                     ("", ": "),
-                    ("class:green", "history"),
-                    ("class:yellow", " FROM TO "),
+                    ("class:command", "history"),
+                    ("class:variable", " FROM TO "),
                     ("", "["),
-                    ("class:blue", "-g "),
-                    ("class:yellow", "GRANULARITY"),
+                    ("class:flag", "-g "),
+                    ("class:variable", "GRANULARITY"),
                     ("", ", "),
-                    ("class:blue", "-h"),
+                    ("class:flag", "-h"),
                     ("", "]"),
                     (
                         "",
@@ -468,45 +481,45 @@ class CLI:
                     ),
                     ("", "\n\n    Required Arguments:"),
                     ("", "\n      "),
-                    ("class:yellow", "FROM"),
+                    ("class:variable", "FROM"),
                     (
                         "",
                         "   The start of the time range to gather historical data for",
                     ),
                     ("", "\n         Given as "),
-                    ("class:yellow", "(YYYY,MM,DD[,HH,MM,SS])"),
+                    ("class:variable", "(YYYY,MM,DD[,HH,MM,SS])"),
                     ("", " ex. "),
-                    ("class:yellow", "(2021,1,1)"),
+                    ("class:variable", "(2021,1,1)"),
                     ("", "\n      "),
-                    ("class:yellow", "TO"),
+                    ("class:variable", "TO"),
                     (
                         "",
                         "     The end of the time range to gather historical data for",
                     ),
                     ("", "\n         Given as "),
-                    ("class:yellow", "(YYYY,MM,DD[,HH,MM,SS])"),
+                    ("class:variable", "(YYYY,MM,DD[,HH,MM,SS])"),
                     ("", " ex. "),
-                    ("class:yellow", "(2021,2,1,20,30)"),
+                    ("class:variable", "(2021,2,1,20,30)"),
                     ("", "\n\n    Optional Arguments:"),
                     ("", "\n      "),
-                    ("class:blue", "-g"),
-                    ("class:yellow", " GRANULARITY "),
+                    ("class:flag", "-g"),
+                    ("class:variable", " GRANULARITY "),
                     ("", "Specify a granularity to use when gathering historical data"),
                     (
                         "",
                         "\n             [S5, S10, S15, S30, M1, M2, M4, M5, M10, M15, M30, H1, H2, H3, H4]",
                     ),
                     ("", "\n      "),
-                    ("class:blue", "-a"),
-                    ("class:yellow", " FILENAME    "),
+                    ("class:flag", "-a"),
+                    ("class:variable", " FILENAME    "),
                     (
                         "",
                         "Specify an alternative filename to save the historical data under",
                     ),
                     ("", "\n      "),
-                    ("class:blue", "-h"),
+                    ("class:flag", "-h"),
                     ("", ", "),
-                    ("class:blue", "--help"),
+                    ("class:flag", "--help"),
                     ("", "  Display this help message\n"),
                 ]
             )
@@ -534,16 +547,16 @@ class CLI:
 
     @staticmethod
     def backtest_usage():
-        if color:
+        if TERMINAL_COLORS:
             color_backtest_usage = FormattedText(
                 [
                     ("", "\n    "),
-                    ("class:cyan", "Usage"),
+                    ("class:info", "Usage"),
                     ("", ": "),
-                    ("class:green", "backtest"),
-                    ("class:yellow", " HISTORY_FILE"),
+                    ("class:command", "backtest"),
+                    ("class:variable", " HISTORY_FILE"),
                     ("", " ["),
-                    ("class:blue", "-h"),
+                    ("class:flag", "-h"),
                     ("", "]"),
                     (
                         "",
@@ -551,21 +564,21 @@ class CLI:
                     ),
                     ("", "\n\n    Required Arguments:"),
                     ("", "\n      "),
-                    ("class:yellow", "HISTORY_FILE"),
+                    ("class:variable", "HISTORY_FILE"),
                     (
                         "",
                         "   The historical data file to backtest your algorithms against",
                     ),
                     ("", "\n         ex. "),
                     (
-                        "class:yellow",
+                        "class:variable",
                         "2021.04.01-2021.05.01[EUR_USD-GBP_USD-EUR_JPY].txt",
                     ),
                     ("", "\n\n    Optional Arguments:"),
                     ("", "\n      "),
-                    ("class:blue", "-h"),
+                    ("class:flag", "-h"),
                     ("", ", "),
-                    ("class:blue", "--help"),
+                    ("class:flag", "--help"),
                     ("", "  Display this help message\n"),
                 ]
             )
@@ -594,11 +607,11 @@ class CLI:
         ]
         for rep in replace_snippets:
             error_message = error_message.replace(rep[0], rep[1])
-        if color:
+        if TERMINAL_COLORS:
             if error_message.startswith("unrecognized arguments:"):
                 color_error_message = FormattedText(
                     [
-                        ("class:orange", "    Error"),
+                        ("class:warning", "    Error"),
                         ("", ": " + error_message + "\n"),
                     ]
                 )
@@ -608,22 +621,22 @@ class CLI:
                 )
                 color_error_message = FormattedText(
                     [
-                        ("class:orange", "    Error"),
+                        ("class:warning", "    Error"),
                         ("", ": " + error_message[: error_message.index("(")]),
                         ("", "(choose from '"),
-                        ("class:green", "start"),
+                        ("class:command", "start"),
                         ("", "', '"),
-                        ("class:green", "stop"),
+                        ("class:command", "stop"),
                         ("", "', '"),
-                        ("class:green", "exit"),
+                        ("class:command", "exit"),
                         ("", "', '"),
-                        ("class:green", "history"),
+                        ("class:command", "history"),
                         ("", "', '"),
-                        ("class:green", "backtest"),
+                        ("class:command", "backtest"),
                         ("", "', '"),
-                        ("class:green", "deploy"),
+                        ("class:command", "deploy"),
                         ("", "', '"),
-                        ("class:green", "help"),
+                        ("class:command", "help"),
                         ("", "')\n"),
                     ]
                 )
@@ -633,11 +646,11 @@ class CLI:
                 ).split(", ")
                 format_args = []
                 for arg in req_args:
-                    format_args.append(("class:yellow", arg))
+                    format_args.append(("class:variable", arg))
                     if arg != req_args[-1]:
                         format_args.append(("", ", "))
                 color_error_message = [
-                    ("class:orange", "    Error"),
+                    ("class:warning", "    Error"),
                     ("", ": the following arguments are required: "),
                 ]
                 color_error_message.extend(format_args)
@@ -647,9 +660,9 @@ class CLI:
                 error_message = error_message.replace("argument ", "").split(":")
                 color_error_message = FormattedText(
                     [
-                        ("class:orange", "    Error"),
+                        ("class:warning", "    Error"),
                         ("", ": argument "),
-                        ("class:blue", error_message[0]),
+                        ("class:flag", error_message[0]),
                         ("", ":" + ":".join(error_message[1:])),
                         ("", "\n"),
                     ]
@@ -658,9 +671,9 @@ class CLI:
                 error_message = error_message.replace("argument ", "").split(":")
                 color_error_message = FormattedText(
                     [
-                        ("class:orange", "    Error"),
+                        ("class:warning", "    Error"),
                         ("", ": argument "),
-                        ("class:yellow", error_message[0]),
+                        ("class:variable", error_message[0]),
                         ("", ":" + ":".join(error_message[1:])),
                         ("", "\n"),
                     ]
@@ -668,7 +681,7 @@ class CLI:
             else:
                 color_error_message = FormattedText(
                     [
-                        ("class:orange", "    Error"),
+                        ("class:warning", "    Error"),
                         ("", ": " + error_message + "\n"),
                     ]
                 )
@@ -689,12 +702,12 @@ class CLI:
                 error_message = "    Error: " + error_message + "\n"
             print(error_message)
 
-    def start(self):
+    def start(self, yes):
         if self.run_flag.is_set():
-            if color:
+            if TERMINAL_COLORS:
                 start_message = FormattedText(
                     [
-                        ("class:cyan", "Info"),
+                        ("class:info", "Info"),
                         ("", ": People's Advisor is already running"),
                     ]
                 )
@@ -702,36 +715,101 @@ class CLI:
             else:
                 print("Info: People's Advisor is already running")
         else:
-            if color:
-                start_message = FormattedText(
-                    [
-                        ("class:cyan", "Info"),
-                        ("", ": Starting People's Advisor"),
-                    ]
-                )
-                print(start_message, style=style, color_depth=TRUE_COLOR)
+            if not LIVE:
+                if TERMINAL_COLORS:
+                    start_message = FormattedText(
+                        [
+                            ("class:info", "Info"),
+                            ("", ": Starting People's Advisor on "),
+                            ("class:info", "PAPER"),
+                            ("", "account with "),
+                            ("class:info", str(type(LIVE_STRATEGIES[0]))),
+                            ("", ", "),
+                            ("class:info", str(type(LIVE_STRATEGIES[1]))),
+                        ]
+                    )
+                    print(start_message, style=style, color_depth=TRUE_COLOR)
+                else:
+                    strategies = f"{str(type(LIVE_STRATEGIES[0]))}, {str(type(LIVE_STRATEGIES[1]))}"
+                    print(
+                        f"Info: Starting People's Advisor on PAPER account with {strategies}"
+                    )
+                self.control.queue_event(StartEvent())
             else:
-                print("Info: Starting People's Advisor")
-            self.events.put(StartEvent())
+                if not yes:
+                    if TERMINAL_COLORS:
+                        warning_message = FormattedText(
+                            [
+                                ("class:warning", "WARNING"),
+                                (
+                                    "",
+                                    ": YOU ARE STARTING PEOPLE'S ADVISOR ON A LIVE ACCOUNT!",
+                                ),
+                                ("", "\n    ARE YOU SURE YOU WISH TO PROCEED? (Y/n): "),
+                            ]
+                        )
+                        print(warning_message, style=style, color_depth=TRUE_COLOR)
+                    else:
+                        print(
+                            "WARNING: YOU ARE STARTING PEOPLE'S ADVISOR ON A LIVE ACCOUNT!"
+                        )
+                        print("    ARE YOU SURE YOU WISH TO PROCEED? (Y/n): ")
+                    confirmation = input()
+                    if confirmation != "Y":
+                        if TERMINAL_COLORS:
+                            confirmation_message = FormattedText(
+                                [
+                                    ("class:info", "Info"),
+                                    ("", ": Canceled starting People's Advisor live"),
+                                ]
+                            )
+                            print(
+                                confirmation_message,
+                                style=style,
+                                color_depth=TRUE_COLOR,
+                            )
+                        else:
+                            print("Info: Canceled starting People's Advisor live")
+                    else:
+                        pass
+                if TERMINAL_COLORS:
+                    start_message = FormattedText(
+                        [
+                            ("class:info", "Info"),
+                            ("", ": Starting People's Advisor on "),
+                            ("class:warning", "LIVE"),
+                            ("", "account with "),
+                            ("class:info", str(type(LIVE_STRATEGIES[0]))),
+                            ("", ", "),
+                            ("class:info", str(type(LIVE_STRATEGIES[1]))),
+                        ]
+                    )
+                    print(start_message, style=style, color_depth=TRUE_COLOR)
+                else:
+                    strategies = f"{str(type(LIVE_STRATEGIES[0]))}, {str(type(LIVE_STRATEGIES[1]))}"
+                    print(
+                        f"Info: Starting People's Advisor on LIVE account with {strategies}"
+                    )
+                self.control.queue_event(StartEvent())
 
     def stop(self):
         if self.run_flag.is_set():
-            if color:
+            if TERMINAL_COLORS:
                 stop_message = FormattedText(
                     [
-                        ("class:cyan", "Info"),
+                        ("class:info", "Info"),
                         ("", ": Stopping People's Advisor"),
                     ]
                 )
                 print(stop_message, style=style, color_depth=TRUE_COLOR)
             else:
                 print("Info: Stopping People's Advisor")
-            self.events.put(StopEvent())
+            self.control.queue_event(StopEvent())
         else:
-            if color:
+            if TERMINAL_COLORS:
                 stop_message = FormattedText(
                     [
-                        ("class:cyan", "Info"),
+                        ("class:info", "Info"),
                         ("", ": People's Advisor is already stopped"),
                     ]
                 )
@@ -741,10 +819,10 @@ class CLI:
 
     def exit(self):
         if self.run_flag.is_set():
-            if color:
+            if TERMINAL_COLORS:
                 exit_message = FormattedText(
                     [
-                        ("class:orange", "WARNING"),
+                        ("class:warning", "WARNING"),
                         ("", ": People's Advisor is currently running."),
                         (
                             "",
@@ -762,24 +840,24 @@ class CLI:
                     "Are you sure you wish to continue and perform a hard stop? (Y/n): "
                 )
             if prompt[0] == "Y":
-                if color:
+                if TERMINAL_COLORS:
                     exit_message = FormattedText(
                         [
-                            ("class:cyan", "Info"),
+                            ("class:info", "Info"),
                             ("", ": Hard stopping People's Advisor"),
                         ]
                     )
                     print(exit_message, style=style, color_depth=TRUE_COLOR)
                 else:
                     print("Info: Hard stopping People's Advisor")
-                self.events.put(ExitEvent())
+                self.control.queue_event(ExitEvent())
                 self.control_thread.join()
                 self.exit_flag = True
             else:
-                if color:
+                if TERMINAL_COLORS:
                     exit_message = FormattedText(
                         [
-                            ("class:cyan", "Info"),
+                            ("class:info", "Info"),
                             ("", ": Aborting hard stop of People's Advisor"),
                         ]
                     )
@@ -787,33 +865,30 @@ class CLI:
                 else:
                     print("Info: Aborting hard stop of People's Advisor")
         else:
-            if color:
+            if TERMINAL_COLORS:
                 exit_message = FormattedText(
                     [
-                        ("class:cyan", "Info"),
+                        ("class:info", "Info"),
                         ("", ": Exiting People's Advisor"),
                     ]
                 )
                 print(exit_message, style=style, color_depth=TRUE_COLOR)
             else:
                 print("Info: Exiting People's Advisor")
-            self.events.put(ExitEvent())
+            self.control.queue_event(ExitEvent())
             self.control_thread.join()
             self.exit_flag = True
 
     @staticmethod
     def history(from_datetime, to_datetime, granularity, filename=None):
-        filename = (
-            history_file_name(instruments, from_datetime, to_datetime)
-            if not filename
-            else filename + ".txt"
-        )
+        if filename is not None:
+            filename += ".txt"
         historical_data = get_historical_gen(
-            instruments, from_datetime, to_datetime, granularity, filename
+            from_datetime, to_datetime, granularity, filename
         )
-        if color:
+        if TERMINAL_COLORS:
             color_formatters = [
-                formatters.Text("Info", style="class:cyan"),
+                formatters.Text("Info", style="class:info"),
                 formatters.Text(": Gathering: "),
                 formatters.Bar(sym_a="=", sym_b="=", sym_c=" ", unknown="="),
                 formatters.Text(" "),
@@ -828,9 +903,9 @@ class CLI:
                     pass
             history_message = FormattedText(
                 [
-                    ("class:cyan", "Info"),
+                    ("class:info", "Info"),
                     ("", ": Data saved to data/history/"),
-                    ("class:cyan", filename),
+                    ("class:info", filename),
                 ]
             )
             print(history_message, style=style, color_depth=TRUE_COLOR)
@@ -851,9 +926,9 @@ class CLI:
     @staticmethod
     def backtest(data_path):
         line_count = 0
-        if color:
+        if TERMINAL_COLORS:
             color_formatters = [
-                formatters.Text("Info", style="class:cyan"),
+                formatters.Text("Info", style="class:info"),
                 formatters.Text(": Preparing backtest: "),
                 formatters.Bar(sym_a="=", sym_b="=", sym_c=" ", unknown="="),
                 formatters.Text(" "),
@@ -864,17 +939,17 @@ class CLI:
             with ProgressBar(
                 style=style, formatters=color_formatters, color_depth=TRUE_COLOR
             ) as pb:
-                for _ in pb(file_size(data_path)):
+                for _ in pb(filesize(data_path)):
                     line_count += 1
             backtest_message = FormattedText(
                 [
-                    ("class:cyan", "Info"),
+                    ("class:info", "Info"),
                     ("", ": Done, beginning backtest"),
                 ]
             )
             print(backtest_message, style=style, color_depth=TRUE_COLOR)
             color_formatters = [
-                formatters.Text("Backtest", style="class:cyan"),
+                formatters.Text("Backtest", style="class:info"),
                 formatters.Text(": ["),
                 formatters.Label(),
                 formatters.Text("]: "),
@@ -885,16 +960,22 @@ class CLI:
                 formatters.TimeLeft(),
                 formatters.Text("  "),
             ]
-            for strat_pair in backtest_strategies:
-                control = Control(strat_pair[0], strat_pair[1], backtesting=True)
+            for strategy_pair in BACKTEST_STRATEGIES:
+                control = Control(strategy_pair[0], strategy_pair[1], backtesting=True)
                 control_thread = Thread(target=control.run, daemon=True)
                 control_thread.start()
-                control.events.put(StartEvent())
+                control.queue_event(StartEvent())
                 label = FormattedText(
                     [
-                        ("class:yellow", str(type(strat_pair[0])).split(".")[-1][:-2]),
+                        (
+                            "class:variable",
+                            str(type(strategy_pair[0])).split(".")[-1][:-2],
+                        ),
                         ("", ", "),
-                        ("class:yellow", str(type(strat_pair[1])).split(".")[-1][:-2]),
+                        (
+                            "class:variable",
+                            str(type(strategy_pair[1])).split(".")[-1][:-2],
+                        ),
                     ]
                 )
                 with ProgressBar(
@@ -910,7 +991,7 @@ class CLI:
                 control_thread.join()
             backtest_message = FormattedText(
                 [
-                    ("class:cyan", "Info"),
+                    ("class:info", "Info"),
                     ("", ": Done, finished backtest"),
                 ]
             )
@@ -925,7 +1006,7 @@ class CLI:
                 formatters.Text("  "),
             ]
             with ProgressBar(formatters=base_formatters) as pb:
-                for _ in pb(file_size(data_path)):
+                for _ in pb(filesize(data_path)):
                     line_count += 1
             print("Info: Done, beginning backtest")
             base_formatters = [
@@ -940,13 +1021,13 @@ class CLI:
                 formatters.TimeLeft(),
                 formatters.Text("  "),
             ]
-            for strat_pair in backtest_strategies:
-                control = Control(strat_pair[0], strat_pair[1], backtesting=True)
+            for strategy_pair in BACKTEST_STRATEGIES:
+                control = Control(strategy_pair[0], strategy_pair[1], backtesting=True)
                 control_thread = Thread(target=control.run, daemon=True)
                 control_thread.start()
-                control.events.put(StartEvent())
-                label = str(type(strat_pair[0])).split(".")[-1][:-2] + ", "
-                label += str(type(strat_pair[1])).split(".")[-1][:-2]
+                control.queue_event(StartEvent())
+                label = str(type(strategy_pair[0])).split(".")[-1][:-2] + ", "
+                label += str(type(strategy_pair[1])).split(".")[-1][:-2]
                 with ProgressBar(
                     formatters=base_formatters, style=style, color_depth=TRUE_COLOR
                 ) as pb:
@@ -959,9 +1040,9 @@ class CLI:
             print("Info: Done, finished backtest")
 
     def run(self):
-        if color:
+        if TERMINAL_COLORS:
             print(
-                FormattedText([("class:red", splash_screen)]),
+                FormattedText([("class:title", splash_screen)]),
                 style=style,
                 color_depth=TRUE_COLOR,
             )
@@ -973,9 +1054,9 @@ class CLI:
         while not self.exit_flag:
             try:
                 with patch_stdout():
-                    if color:
+                    if TERMINAL_COLORS:
                         prompt = self.session.prompt(
-                            FormattedText([("class:gray", "pa> ")]),
+                            FormattedText([("class:prompt", "pa> ")]),
                             style=style,
                             color_depth=TRUE_COLOR,
                             completer=NestedCLiCompleter(),
@@ -1012,7 +1093,7 @@ class CLI:
                     continue
 
                 if args.command == "start":
-                    self.start()
+                    self.start(args.yes)
                 elif args.command == "stop":
                     self.stop()
                 elif args.command == "exit":
@@ -1029,10 +1110,10 @@ class CLI:
                     self.peoples_advisor_usage()
             except KeyboardInterrupt:
                 try:
-                    if color:
+                    if TERMINAL_COLORS:
                         exit_message = FormattedText(
                             [
-                                ("class:orange", "WARNING"),
+                                ("class:warning", "WARNING"),
                                 (
                                     "",
                                     ": It is recommended you exit People's Advisor with the exit command.",

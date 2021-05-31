@@ -1,40 +1,40 @@
 import json
-from decimal import Decimal, getcontext
+from decimal import Decimal
 from queue import PriorityQueue
 from threading import Event
 
 from pa.api.oanda_api import OandaApi
 from pa.api.unofficial_oanda_api import get_historical_spreads
 from pa.backtest.common import *
-from pa.event.event import PriceEvent, StopEvent
-from pa.settings import api_token
+from pa.common.common import extend_instrument_list
+from pa.event.event import PriceEvent, InfoEvent, StopEvent
+from pa.settings import API_TOKEN, INSTRUMENTS, ACCOUNT_CURRENCY
 
 
 class OandaBacktestingData(BaseBacktestingData):
     def __init__(
         self,
-        instruments: List[str],
         from_time: datetime,
         to_time: datetime,
         granularity: str = None,
-        file_name: str = None,
+        filename: str = None,
     ):
         super().__init__()
-        self.instruments = instruments
         self.from_datetime = from_time
         self.to_datetime = to_time
         self.gran = granularity
-        if not file_name:
-            file_name = standard_file_name(instruments, from_time, to_time)
-        self.file_path = history_file_path(file_name)
+        if not filename:
+            filename = standard_filename(from_time, to_time, INSTRUMENTS)
+        self.filepath = history_filepath(filename)
 
     def gen(self):
         start = self.from_datetime.timestamp()
         end = self.to_datetime.timestamp()
-        api = OandaApi(api_token, live=False, datetime_format="UNIX")
+        api = OandaApi(API_TOKEN, live=False, datetime_format="UNIX")
+        all_instruments = extend_instrument_list(INSTRUMENTS, ACCOUNT_CURRENCY)
         prices, spreads, pointers = {}, {}, {}
         # Initialize the first page of prices for each instrument and initialize the pointers to walk the lists
-        for instrument in self.instruments:
+        for instrument in all_instruments:
             candles = api.get_instrument_candles(
                 instrument, from_time=str(start), count=5000, granularity=self.gran
             )
@@ -50,7 +50,7 @@ class OandaBacktestingData(BaseBacktestingData):
                 )
                 pointers.update({instrument: {"price": 0, "spread": 0}})
 
-        with open(self.file_path, "w") as f:
+        with open(self.filepath, "w") as f:
             # Begin walking the lists and adding prices in chronological order
             while (
                 len(prices.keys()) > 0
@@ -125,9 +125,9 @@ class OandaBacktestingData(BaseBacktestingData):
                     )
                     spread = pip_spread * place
                     # Write price to file
-                    getcontext().prec = 6
                     # This approximates bid and ask for a given candle using its closing price and the spread
                     price_dict = {
+                        "type": "PRICE" if next_inst in INSTRUMENTS else "INFO",
                         "inst": next_inst,
                         "time": next_time,
                         "bid": str(price - spread),
@@ -153,12 +153,20 @@ class OandaBacktestingGen(BaseBacktestingGen):
                 if not self.run_flag.is_set():
                     break
                 price = json.loads(price)
-                price_event = PriceEvent(
-                    price["inst"],
-                    datetime.fromtimestamp(price["time"]),
-                    Decimal(price["bid"]),
-                    Decimal(price["ask"]),
-                )
-                self.queue.put(price_event)
+                if price["type"] == "PRICE":
+                    event = PriceEvent(
+                        price["inst"],
+                        datetime.fromtimestamp(price["time"]),
+                        Decimal(price["bid"]),
+                        Decimal(price["ask"]),
+                    )
+                elif price["type"] == "INFO":
+                    event = InfoEvent(
+                        price["inst"],
+                        datetime.fromtimestamp(price["time"]),
+                        Decimal(price["bid"]),
+                        Decimal(price["ask"]),
+                    )
+                self.queue.put(event)
                 yield
             self.queue.put(StopEvent())

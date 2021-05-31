@@ -2,7 +2,8 @@ from queue import PriorityQueue
 from threading import Thread, Event
 
 from pa.event.event import ExitEvent, BaseEvent
-from pa.price.price import OandaPricingGen
+from pa.price.price import get_pricing_gen
+from pa.portfolio.portfolio import Portfolio
 from pa.signal.signal import SignalStrategy
 from pa.sizing.sizing import SizingStrategy
 
@@ -19,8 +20,10 @@ class Control:
         self.events = PriorityQueue()
         self.backtesting = backtesting
         self.pricing_stream = Thread(
-            target=OandaPricingGen(self.events, self.run_flag).gen, daemon=True
+            target=get_pricing_gen(self.events, self.run_flag, self.exit_flag).gen,
+            daemon=True,
         )
+        self.portfolio = Portfolio()
         self.sig_strategy = sig_strategy
         self.size_strategy = size_strategy
 
@@ -40,8 +43,11 @@ class Control:
                 order_event = self.size_strategy.gen_order(event)
                 self.queue_event(order_event)
             elif event.type == "PRICE":  # Pass price events to signal gen
+                self.portfolio.update_price(event)
                 signal_event = self.sig_strategy.gen_signal(event)
                 self.queue_event(signal_event)
+            elif event.type == "INFO":
+                self.portfolio.update_price(event)
             elif event.type == "STOP":
                 self.run_flag.clear()
                 self.queue_event(ExitEvent())
