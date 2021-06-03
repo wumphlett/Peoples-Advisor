@@ -1,39 +1,45 @@
 from decimal import Decimal
 from queue import PriorityQueue
 from threading import Event
+from typing import List
 
 from pa.api.oanda_api import OandaApi
 from pa.common.common import extend_instrument_list
-from pa.event.event import PriceEvent, InfoEvent
+from pa.event.event import PriceEvent, QuoteEvent
 from pa.price.common import BasePricingGen
-from pa.settings import (
-    API_TOKEN,
-    LIVE,
-    ACCOUNT_INDEX,
-    DATETIME_FORMAT,
-    INSTRUMENTS,
-    ACCOUNT_CURRENCY,
-)
 
 
 class OandaPricingGen(BasePricingGen):
     def __init__(
-        self, priority_queue: PriorityQueue, run_flag: Event, exit_flag: Event
+        self,
+        api_token: str,
+        live: bool,
+        account_index: int,
+        datetime_format: str,
+        instruments: List[str],
+        account_currency: str,
+        priority_queue: PriorityQueue,
+        run_flag: Event,
+        exit_flag: Event,
     ):
         super().__init__()
-        self.api = OandaApi(API_TOKEN, LIVE, ACCOUNT_INDEX, DATETIME_FORMAT)
+        self.instruments = instruments
+        self.account_currency = account_currency
+        self.api = OandaApi(api_token, live, account_index, datetime_format)
         self.queue = priority_queue
         self.run_flag = run_flag
         self.exit_flag = exit_flag
 
     def gen(self):
         try:
-            all_instruments = extend_instrument_list(INSTRUMENTS, ACCOUNT_CURRENCY)
+            all_instruments = extend_instrument_list(
+                self.instruments, self.account_currency
+            )
             pricing_stream = self.api.pricing_stream(all_instruments)
             for price in pricing_stream:
                 if not self.run_flag.is_set():
                     break
-                if price["instrument"] in INSTRUMENTS:
+                if price["instrument"] in self.instruments:
                     event = PriceEvent(
                         price["instrument"],
                         self.api.oanda_time_to_datetime(price["time"]),
@@ -41,7 +47,7 @@ class OandaPricingGen(BasePricingGen):
                         Decimal(price["asks"][0]["price"]),
                     )
                 else:
-                    event = InfoEvent(
+                    event = QuoteEvent(
                         price["instrument"],
                         self.api.oanda_time_to_datetime(price["time"]),
                         Decimal(price["bids"][0]["price"]),

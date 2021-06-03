@@ -133,6 +133,8 @@ dmypy.json
 
 # People's Advisor
 pa/data/**/*
+sandbox.py
 pa/settings.py
 pa/TODO.txt
-sandbox.py
+calculations.txt
+orders.txt

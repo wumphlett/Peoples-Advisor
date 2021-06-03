@@ -2,7 +2,7 @@ from typing import Union
 from decimal import Decimal
 
 from pa.common.common import PAError, get_margins
-from pa.event.event import PriceEvent, InfoEvent
+from pa.event.event import PriceEvent, QuoteEvent
 from pa.settings import BALANCE, ACCOUNT_CURRENCY, INSTRUMENTS
 
 
@@ -17,7 +17,7 @@ class Portfolio:
         # In the form of {instrument_pair: (units: Decimal, price bought/sold at: Decimal)}
         self.positions = {}
 
-    def update_price(self, price: Union[PriceEvent, InfoEvent]):
+    def update_price(self, price: Union[PriceEvent, QuoteEvent]):
         self.prices.update({price.instrument: {"bid": price.bid, "ask": price.ask}})
         # TODO check orders and prices for things
 

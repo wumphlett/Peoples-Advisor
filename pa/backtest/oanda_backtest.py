@@ -1,41 +1,48 @@
-import json
 from decimal import Decimal
 from queue import PriorityQueue
 from threading import Event
+from typing import List
 
 from pa.api.oanda_api import OandaApi
 from pa.api.unofficial_oanda_api import get_historical_spreads
 from pa.backtest.common import *
 from pa.common.common import extend_instrument_list
-from pa.event.event import PriceEvent, InfoEvent, StopEvent
-from pa.settings import API_TOKEN, INSTRUMENTS, ACCOUNT_CURRENCY
+from pa.event.event import PriceEvent, QuoteEvent, StopEvent, event_from_repr
 
 
 class OandaBacktestingData(BaseBacktestingData):
     def __init__(
         self,
+        api_token: str,
+        instruments: List[str],
+        account_currency: str,
         from_time: datetime,
         to_time: datetime,
         granularity: str = None,
         filename: str = None,
     ):
         super().__init__()
+        self.api = OandaApi(api_token, live=False, datetime_format="UNIX")
+        self.instruments = instruments
+        self.account_currency = account_currency
         self.from_datetime = from_time
         self.to_datetime = to_time
         self.gran = granularity
         if not filename:
-            filename = standard_filename(from_time, to_time, INSTRUMENTS)
+            filename = standard_filename(from_time, to_time, instruments)
         self.filepath = history_filepath(filename)
+        self.filename = filename
 
     def gen(self):
         start = self.from_datetime.timestamp()
         end = self.to_datetime.timestamp()
-        api = OandaApi(API_TOKEN, live=False, datetime_format="UNIX")
-        all_instruments = extend_instrument_list(INSTRUMENTS, ACCOUNT_CURRENCY)
+        all_instruments = extend_instrument_list(
+            self.instruments, self.account_currency
+        )
         prices, spreads, pointers = {}, {}, {}
         # Initialize the first page of prices for each instrument and initialize the pointers to walk the lists
         for instrument in all_instruments:
-            candles = api.get_instrument_candles(
+            candles = self.api.get_instrument_candles(
                 instrument, from_time=str(start), count=5000, granularity=self.gran
             )
             candles = candles.get("candles")
@@ -52,39 +59,27 @@ class OandaBacktestingData(BaseBacktestingData):
 
         with open(self.filepath, "w") as f:
             # Begin walking the lists and adding prices in chronological order
-            while (
-                len(prices.keys()) > 0
-            ):  # As instrument pairs are completed, they are removed from the prices dict
-                earliest = (
-                    []
-                )  # Store the earliest available price per pair not already exported
-                rem_list = (
-                    []
-                )  # Store the instruments to be deleted from the prices dict
+            while len(prices.keys()) > 0:
+                earliest = []
+                rem_list = []
                 for inst in prices:
-                    if pointers[inst]["price"] < len(
-                        prices[inst]
-                    ):  # Check if pointer is in instrument candles range
+                    if pointers[inst]["price"] < len(prices[inst]):
                         cur_price_time = float(
                             prices[inst][pointers[inst]["price"]]["time"]
                         )
-                        if (
-                            cur_price_time < end
-                        ):  # Check if time is in range of desired results
+                        if cur_price_time < end:
                             earliest.append((cur_price_time, inst))
                         else:  # The times for a given instrument has exceeded the end time, remove from prices dict
                             rem_list.append(inst)
                     else:  # The prices dict needs to be updated with the next page of results
-                        candles = api.get_instrument_candles(
+                        candles = self.api.get_instrument_candles(
                             inst,
                             from_time=prices[inst][-1]["time"],
                             count=5000,
                             granularity=self.gran,
                         )
                         candles = candles.get("candles")
-                        if (
-                            len(candles) > 1 and float(candles[0]["time"]) < end
-                        ):  # Next page of results is valid
+                        if len(candles) > 1 and float(candles[0]["time"]) < end:
                             earliest.append((float(candles[0]["time"]), inst))
                             prices[inst] = candles
                             pointers[inst]["price"] = 0
@@ -116,24 +111,29 @@ class OandaBacktestingData(BaseBacktestingData):
                     pip_spread = Decimal(
                         spreads[next_inst][pointers[next_inst]["spread"]][1]
                     ) / Decimal(2)
-                    place = Decimal(1) / Decimal(
-                        10 * (len(price_str.split(".")[1]) - 1)
-                    )
+                    place = len(price_str.split(".")[1]) - 1
                     # Calculate the price
                     price = Decimal(
                         prices[next_inst][pointers[next_inst]["price"]]["mid"]["c"]
                     )
-                    spread = pip_spread * place
+                    spread = pip_spread * (Decimal("10") ** -place)
                     # Write price to file
                     # This approximates bid and ask for a given candle using its closing price and the spread
-                    price_dict = {
-                        "type": "PRICE" if next_inst in INSTRUMENTS else "INFO",
-                        "inst": next_inst,
-                        "time": next_time,
-                        "bid": str(price - spread),
-                        "ask": str(price + spread),
-                    }
-                    f.write(json.dumps(price_dict) + "\n")
+                    if next_inst in self.instruments:
+                        price_event = PriceEvent(
+                            next_inst,
+                            datetime.fromtimestamp(next_time),
+                            (price - spread).quantize(Decimal("10") ** (-1 - place)),
+                            (price + spread).quantize(Decimal("10") ** (-1 - place)),
+                        )
+                    else:
+                        price_event = QuoteEvent(
+                            next_inst,
+                            datetime.fromtimestamp(next_time),
+                            (price - spread).quantize(Decimal("10") ** (-1 - place)),
+                            (price + spread).quantize(Decimal("10") ** (-1 - place)),
+                        )
+                    f.write(repr(price_event) + "\n")
                     # Advance instrument price pointer
                     pointers[next_inst]["price"] += 1
                     # yield for progress indication in cli
@@ -152,21 +152,7 @@ class OandaBacktestingGen(BaseBacktestingGen):
             for price in f:
                 if not self.run_flag.is_set():
                     break
-                price = json.loads(price)
-                if price["type"] == "PRICE":
-                    event = PriceEvent(
-                        price["inst"],
-                        datetime.fromtimestamp(price["time"]),
-                        Decimal(price["bid"]),
-                        Decimal(price["ask"]),
-                    )
-                elif price["type"] == "INFO":
-                    event = InfoEvent(
-                        price["inst"],
-                        datetime.fromtimestamp(price["time"]),
-                        Decimal(price["bid"]),
-                        Decimal(price["ask"]),
-                    )
-                self.queue.put(event)
+                price_event = event_from_repr(price)
+                self.queue.put(price_event)
                 yield
             self.queue.put(StopEvent())

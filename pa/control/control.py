@@ -46,7 +46,7 @@ class Control:
                 self.portfolio.update_price(event)
                 signal_event = self.sig_strategy.gen_signal(event)
                 self.queue_event(signal_event)
-            elif event.type == "INFO":
+            elif event.type == "QUOTE":
                 self.portfolio.update_price(event)
             elif event.type == "STOP":
                 self.run_flag.clear()

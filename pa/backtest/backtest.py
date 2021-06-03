@@ -6,6 +6,7 @@ from threading import Event
 from pa.backtest.oanda_backtest import OandaBacktestingData, OandaBacktestingGen
 from pa.settings import (
     BROKER,
+    API_TOKEN,
     INSTRUMENTS,
     ACCOUNT_CURRENCY,
 )
@@ -28,7 +29,13 @@ def get_historical_gen(
 ):
     if BROKER == "OANDA":
         return OandaBacktestingData(
-            INSTRUMENTS, ACCOUNT_CURRENCY, from_time, to_time, granularity, filename
+            API_TOKEN,
+            INSTRUMENTS,
+            ACCOUNT_CURRENCY,
+            from_time,
+            to_time,
+            granularity,
+            filename,
         )
     else:
         return

@@ -12,7 +12,7 @@ practice_stream_url = "https://stream-fxpractice.oanda.com"
 live_stream_url = "https://stream-fxtrade.oanda.com"
 
 
-def _cond_up(store_dict, condition, key, value):
+def _conditional_update(store_dict, condition, key, value):
     if condition is not None and (condition is not bool or condition):
         store_dict.update({key: value})
 
@@ -82,7 +82,9 @@ class TakeProfitDetails:
             raise OandaError(
                 "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
             )
-        _cond_up(tpd_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
+        _conditional_update(
+            tpd_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
+        )
         tpd_dict.update(self.client_extensions if self.client_extensions else {})
         return tpd_dict
 
@@ -135,7 +137,9 @@ class StopLossDetails:
             raise OandaError(
                 "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
             )
-        _cond_up(sl_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
+        _conditional_update(
+            sl_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
+        )
         sl_dict.update(self.client_extensions if self.client_extensions else {})
         return sl_dict
 
@@ -188,7 +192,9 @@ class GuaranteedStopLossDetails:
             raise OandaError(
                 "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
             )
-        _cond_up(gsl_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
+        _conditional_update(
+            gsl_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
+        )
         gsl_dict.update(self.client_extensions if self.client_extensions else {})
         return gsl_dict
 
@@ -232,7 +238,9 @@ class TrailingStopLossDetails:
             raise OandaError(
                 "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
             )
-        _cond_up(tsl_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
+        _conditional_update(
+            tsl_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
+        )
         tsl_dict.update(self.client_extensions if self.client_extensions else {})
         return tsl_dict
 
@@ -317,38 +325,40 @@ class MarketOrderRequest(OrderRequest):
             "timeInForce": self.time_in_force,
             "positionFill": self.position_fill,
         }
-        _cond_up(mor_dict, self.price_floor, "priceBound", str(self.price_floor))
-        _cond_up(
+        _conditional_update(
+            mor_dict, self.price_floor, "priceBound", str(self.price_floor)
+        )
+        _conditional_update(
             mor_dict,
             self.take_profit_on_fill,
             "takeProfitOnFill",
             self.take_profit_on_fill.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             mor_dict,
             self.stop_loss_on_fill,
             "stopLossOnFill",
             self.stop_loss_on_fill.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             mor_dict,
             self.guaranteed_stop_loss_on_fill,
             "guaranteedStopLossOnFill",
             self.guaranteed_stop_loss_on_fill.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             mor_dict,
             self.trailing_stop_loss_on_fill,
             "trailingStopLossOnFill",
             self.trailing_stop_loss_on_fill.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             mor_dict,
             self.client_extensions,
             "clientExtensions",
             self.client_extensions.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             mor_dict,
             self.trade_client_extensions,
             "tradeClientExtensions",
@@ -440,38 +450,40 @@ class LimitOrderRequest(OrderRequest):
             raise OandaError(
                 "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
             )
-        _cond_up(lor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
-        _cond_up(
+        _conditional_update(
+            lor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
+        )
+        _conditional_update(
             lor_dict,
             self.take_profit_on_fill,
             "takeProfitOnFill",
             self.take_profit_on_fill.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             lor_dict,
             self.stop_loss_on_fill,
             "stopLossOnFill",
             self.stop_loss_on_fill.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             lor_dict,
             self.guaranteed_stop_loss_on_fill,
             "guaranteedStopLossOnFill",
             self.guaranteed_stop_loss_on_fill.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             lor_dict,
             self.trailing_stop_loss_on_fill,
             "trailingStopLossOnFill",
             self.trailing_stop_loss_on_fill.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             lor_dict,
             self.client_extensions,
             "clientExtensions",
             self.client_extensions.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             lor_dict,
             self.trade_client_extensions,
             "tradeClientExtensions",
@@ -567,39 +579,43 @@ class StopOrderRequest(OrderRequest):
             raise OandaError(
                 "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
             )
-        _cond_up(sor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
-        _cond_up(sor_dict, self.price_floor, "priceBound", str(self.price_floor))
-        _cond_up(
+        _conditional_update(
+            sor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
+        )
+        _conditional_update(
+            sor_dict, self.price_floor, "priceBound", str(self.price_floor)
+        )
+        _conditional_update(
             sor_dict,
             self.take_profit_on_fill,
             "takeProfitOnFill",
             self.take_profit_on_fill.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             sor_dict,
             self.stop_loss_on_fill,
             "stopLossOnFill",
             self.stop_loss_on_fill.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             sor_dict,
             self.guaranteed_stop_loss_on_fill,
             "guaranteedStopLossOnFill",
             self.guaranteed_stop_loss_on_fill.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             sor_dict,
             self.trailing_stop_loss_on_fill,
             "trailingStopLossOnFill",
             self.trailing_stop_loss_on_fill.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             sor_dict,
             self.client_extensions,
             "clientExtensions",
             self.client_extensions.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             sor_dict,
             self.trade_client_extensions,
             "tradeClientExtensions",
@@ -696,39 +712,43 @@ class MarketIfTouchedOrderRequest(OrderRequest):
             raise OandaError(
                 "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
             )
-        _cond_up(motor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
-        _cond_up(motor_dict, self.price_floor, "priceBound", str(self.price_floor))
-        _cond_up(
+        _conditional_update(
+            motor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
+        )
+        _conditional_update(
+            motor_dict, self.price_floor, "priceBound", str(self.price_floor)
+        )
+        _conditional_update(
             motor_dict,
             self.take_profit_on_fill,
             "takeProfitOnFill",
             self.take_profit_on_fill.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             motor_dict,
             self.stop_loss_on_fill,
             "stopLossOnFill",
             self.stop_loss_on_fill.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             motor_dict,
             self.guaranteed_stop_loss_on_fill,
             "guaranteedStopLossOnFill",
             self.guaranteed_stop_loss_on_fill.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             motor_dict,
             self.trailing_stop_loss_on_fill,
             "trailingStopLossOnFill",
             self.trailing_stop_loss_on_fill.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             motor_dict,
             self.client_extensions,
             "clientExtensions",
             self.client_extensions.as_dict(),
         )
-        _cond_up(
+        _conditional_update(
             motor_dict,
             self.trade_client_extensions,
             "tradeClientExtensions",
@@ -790,9 +810,13 @@ class TakeProfitOrderRequest(OrderRequest):
             raise OandaError(
                 "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
             )
-        _cond_up(tpor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
-        _cond_up(tpor_dict, self.client_trade_id, "clientTradeID", self.client_trade_id)
-        _cond_up(
+        _conditional_update(
+            tpor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
+        )
+        _conditional_update(
+            tpor_dict, self.client_trade_id, "clientTradeID", self.client_trade_id
+        )
+        _conditional_update(
             tpor_dict,
             self.client_extensions,
             "clientExtensions",
@@ -864,9 +888,13 @@ class StopLossOrderRequest(OrderRequest):
             )
         slor_dict.update({"price": str(self.price)} if self.price else {})
         slor_dict.update({"distance": str(self.distance)} if self.distance else {})
-        _cond_up(slor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
-        _cond_up(slor_dict, self.client_trade_id, "clientTradeID", self.client_trade_id)
-        _cond_up(
+        _conditional_update(
+            slor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
+        )
+        _conditional_update(
+            slor_dict, self.client_trade_id, "clientTradeID", self.client_trade_id
+        )
+        _conditional_update(
             slor_dict,
             self.client_extensions,
             "clientExtensions",
@@ -940,11 +968,13 @@ class GuaranteedStopLossOrderRequest(OrderRequest):
             )
         gslor_dict.update({"price": str(self.price)} if self.price else {})
         gslor_dict.update({"distance": str(self.distance)} if self.distance else {})
-        _cond_up(gslor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
-        _cond_up(
+        _conditional_update(
+            gslor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
+        )
+        _conditional_update(
             gslor_dict, self.client_trade_id, "clientTradeID", self.client_trade_id
         )
-        _cond_up(
+        _conditional_update(
             gslor_dict,
             self.client_extensions,
             "clientExtensions",
@@ -1007,11 +1037,13 @@ class TrailingStopLossOrderRequest(OrderRequest):
                 "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
             )
         tslor_dict.update({"distance": str(self.distance)} if self.distance else {})
-        _cond_up(tslor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
-        _cond_up(
+        _conditional_update(
+            tslor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
+        )
+        _conditional_update(
             tslor_dict, self.client_trade_id, "clientTradeID", self.client_trade_id
         )
-        _cond_up(
+        _conditional_update(
             tslor_dict,
             self.client_extensions,
             "clientExtensions",

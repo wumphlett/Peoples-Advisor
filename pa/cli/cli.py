@@ -881,11 +881,12 @@ class CLI:
 
     @staticmethod
     def history(from_datetime, to_datetime, granularity, filename=None):
-        if filename is not None:
+        if filename:
             filename += ".txt"
         historical_data = get_historical_gen(
             from_datetime, to_datetime, granularity, filename
         )
+        filename = filename if filename else historical_data.filename
         if TERMINAL_COLORS:
             color_formatters = [
                 formatters.Text("Info", style="class:info"),
@@ -899,13 +900,18 @@ class CLI:
             with ProgressBar(
                 style=style, formatters=color_formatters, color_depth=TRUE_COLOR
             ) as pb:
-                for _ in pb(historical_data.gen()):
+                try:
+                    count = 0
+                    for _ in pb(historical_data.gen()):
+                        count += 1
+                except ZeroDivisionError:
                     pass
             history_message = FormattedText(
                 [
                     ("class:info", "Info"),
                     ("", ": Data saved to data/history/"),
                     ("class:info", filename),
+                    ("", f" ({count} data-points)"),
                 ]
             )
             print(history_message, style=style, color_depth=TRUE_COLOR)
@@ -919,9 +925,17 @@ class CLI:
                 formatters.Text("  "),
             ]
             with ProgressBar(formatters=base_formatters) as pb:
-                for _ in pb(historical_data.gen()):
+                try:
+                    count = 0
+                    for _ in pb(historical_data.gen()):
+                        count += 1
+                except ZeroDivisionError:
                     pass
-            print("Info: Data saved to data/history/" + filename)
+            print(
+                "Info: Data saved to data/history/"
+                + filename
+                + f" ({count} data-points)"
+            )
 
     @staticmethod
     def backtest(data_path):
@@ -939,8 +953,11 @@ class CLI:
             with ProgressBar(
                 style=style, formatters=color_formatters, color_depth=TRUE_COLOR
             ) as pb:
-                for _ in pb(filesize(data_path)):
-                    line_count += 1
+                try:
+                    for _ in pb(filesize(data_path)):
+                        line_count += 1
+                except ZeroDivisionError:
+                    pass
             backtest_message = FormattedText(
                 [
                     ("class:info", "Info"),
@@ -1006,8 +1023,11 @@ class CLI:
                 formatters.Text("  "),
             ]
             with ProgressBar(formatters=base_formatters) as pb:
-                for _ in pb(filesize(data_path)):
-                    line_count += 1
+                try:
+                    for _ in pb(filesize(data_path)):
+                        line_count += 1
+                except ZeroDivisionError:
+                    pass
             print("Info: Done, beginning backtest")
             base_formatters = [
                 formatters.Text("Backtest: ["),
@@ -1034,7 +1054,12 @@ class CLI:
                     historical_gen = get_backtesting_gen(
                         control.events, control.run_flag, data_path
                     )
-                    for _ in pb(historical_gen.gen(), label=label, total=line_count):
+                    try:
+                        for _ in pb(
+                            historical_gen.gen(), label=label, total=line_count
+                        ):
+                            pass
+                    except ZeroDivisionError:
                         pass
                 control_thread.join()
             print("Info: Done, finished backtest")
