@@ -1,6 +1,6 @@
 import pytest
-from pa.settings import API_TOKEN
-from pa.api.oanda_api import API, OandaError
+from peoples_advisor.settings import API_TOKEN
+from peoples_advisor.api.oanda_api import API, OandaError
 
 
 class TestOandaAPI:

@@ -132,9 +132,9 @@ dmypy.json
 .idea/
 
 # People's Advisor
-pa/data/**/*
+peoples_advisor/data/**/*
 sandbox.py
-pa/settings.py
-pa/TODO.txt
+peoples_advisor/settings.py
+peoples_advisor/TODO.txt
 calculations.txt
 orders.txt
