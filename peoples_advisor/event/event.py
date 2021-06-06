@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Optional
 from datetime import datetime
 
-from peoples_advisor.api.oanda_api import OrderRequest
+from peoples_advisor.api.oanda.oanda_api import OrderRequest
 
 
 class BaseEvent(ABC):

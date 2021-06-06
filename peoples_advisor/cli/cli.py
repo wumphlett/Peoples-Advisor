@@ -20,7 +20,7 @@ from prompt_toolkit.shortcuts.progress_bar import formatters
 from prompt_toolkit.styles import Style
 
 from peoples_advisor.backtest.backtest import get_historical_gen, get_backtesting_gen
-from peoples_advisor.backtest.common import filesize
+from peoples_advisor.backtest.common.common import filesize
 from peoples_advisor.control.control import Control
 from peoples_advisor.event.event import StartEvent, StopEvent, ExitEvent
 from peoples_advisor.settings import (

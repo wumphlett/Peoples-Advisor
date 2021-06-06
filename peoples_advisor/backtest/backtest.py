@@ -3,7 +3,7 @@ from pathlib import Path
 from queue import PriorityQueue
 from threading import Event
 
-from peoples_advisor.backtest.oanda_backtest import (
+from peoples_advisor.backtest.oanda.oanda_backtest import (
     OandaBacktestingData,
     OandaBacktestingGen,
 )

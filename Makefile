@@ -1,8 +1,9 @@
-.PHONY: check, format, req, test
+.PHONY: check, format, req, test, run
 
 check:
 	@poetry run black peoples_advisor --check
 	@poetry run pylama
+	@poetry run mypy peoples_advisor
 
 format:
 	@poetry run black peoples_advisor
@@ -12,3 +13,7 @@ req:
 
 test:
 	@poetry run pytest
+
+run:
+	@poetry run python peoples_advisor/setup.py
+	@poetry run python peoples_advisor/main.py

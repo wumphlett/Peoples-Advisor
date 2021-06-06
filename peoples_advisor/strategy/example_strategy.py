@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from peoples_advisor.api.oanda_api import MarketOrderRequest
+from peoples_advisor.api.oanda.oanda_api import MarketOrderRequest
 from peoples_advisor.event.event import SignalEvent, OrderEvent
 from peoples_advisor.signal.signal import SignalStrategy
 from peoples_advisor.sizing.sizing import SizingStrategy

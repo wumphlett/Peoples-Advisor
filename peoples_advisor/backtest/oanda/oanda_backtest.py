@@ -3,9 +3,9 @@ from queue import PriorityQueue
 from threading import Event
 from typing import List
 
-from peoples_advisor.api.oanda_api import OandaApi
-from peoples_advisor.api.unofficial_oanda_api import get_historical_spreads
-from peoples_advisor.backtest.common import *
+from peoples_advisor.api.oanda.oanda_api import OandaApi
+from peoples_advisor.api.oanda.unofficial_oanda_api import get_historical_spreads
+from peoples_advisor.backtest.common.common import *
 from peoples_advisor.common.common import extend_instrument_list
 from peoples_advisor.event.event import (
     PriceEvent,

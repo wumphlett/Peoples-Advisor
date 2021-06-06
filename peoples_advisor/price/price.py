@@ -1,7 +1,7 @@
 from queue import PriorityQueue
 from threading import Event
 
-from peoples_advisor.price.oanda_price import OandaPricingGen
+from peoples_advisor.price.oanda.oanda_price import OandaPricingGen
 from peoples_advisor.settings import (
     BROKER,
     API_TOKEN,

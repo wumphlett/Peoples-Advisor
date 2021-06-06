@@ -3,10 +3,10 @@ from queue import PriorityQueue
 from threading import Event
 from typing import List
 
-from peoples_advisor.api.oanda_api import OandaApi
+from peoples_advisor.api.oanda.oanda_api import OandaApi
 from peoples_advisor.common.common import extend_instrument_list
 from peoples_advisor.event.event import PriceEvent, QuoteEvent
-from peoples_advisor.price.common import BasePricingGen
+from peoples_advisor.price.common.common import BasePricingGen
 
 
 class OandaPricingGen(BasePricingGen):

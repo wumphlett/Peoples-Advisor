@@ -9,9 +9,7 @@ if __name__ == "__main__":  # TODO Test if works in virtualenv
         lib_paths.append(get_python_lib(prefix="/usr/local"))
     overlay_warning = False
     for lib_path in lib_paths:
-        existing_path = os.path.abspath(
-            os.path.join(lib_path, "peoples_advisor.pth")
-        )  # TODO RENAME PA TO PEOPLES_ADVISOR
+        existing_path = os.path.abspath(os.path.join(lib_path, "peoples_advisor.pth"))
         if os.path.exists(existing_path):
             # We note the need for the warning here, but present it after the
             # command is run, so it's more likely to be seen.
