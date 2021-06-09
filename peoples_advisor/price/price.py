@@ -10,6 +10,7 @@ from peoples_advisor.settings import (
     DATETIME_FORMAT,
     INSTRUMENTS,
     ACCOUNT_CURRENCY,
+    SAVE_LIVE_AS_HISTORICAL,
 )
 
 
@@ -25,6 +26,7 @@ def get_pricing_gen(priority_queue: PriorityQueue, run_flag: Event, exit_flag: E
             priority_queue,
             run_flag,
             exit_flag,
+            SAVE_LIVE_AS_HISTORICAL,
         )
     else:
         return

@@ -63,6 +63,8 @@ def validate_settings():
             )
     if BALANCE <= 0:
         raise PAError("BALANCE must be greater than 0")
+    if type(SAVE_LIVE_AS_HISTORICAL) is not bool:
+        raise PAError("SAVE_LIVE_AS_HISTORICAL must be a boolean value")
     if type(TERMINAL_COLORS) is not bool:
         raise PAError("TERMINAL_COLORS must be a boolean value")
 

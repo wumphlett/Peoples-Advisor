@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
 
-base_path = Path(__file__).parents[1] / "data" / "history"
+base_path = Path(__file__).parents[2] / "data" / "history"
 
 
 def standard_filename(from_time: datetime, to_time: datetime, instruments):
@@ -11,9 +11,9 @@ def standard_filename(from_time: datetime, to_time: datetime, instruments):
     return filename
 
 
-def history_filepath(filename: str):
+def history_filepath(filename: str, delete=True):
     history_path = base_path / filename
-    if history_path.is_file():
+    if history_path.is_file() and delete:
         history_path.unlink()
     return history_path
 

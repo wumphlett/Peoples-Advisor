@@ -1,12 +1,15 @@
+import os
 from decimal import Decimal
+from datetime import datetime
 from queue import PriorityQueue
 from threading import Event
 from typing import List
 
 from peoples_advisor.api.oanda.oanda_api import OandaApi
+from peoples_advisor.backtest.common.common import history_filepath
 from peoples_advisor.common.common import extend_instrument_list
 from peoples_advisor.event.event import PriceEvent, QuoteEvent
-from peoples_advisor.price.common.common import BasePricingGen
+from peoples_advisor.price.common.common import BasePricingGen, standard_filename
 
 
 class OandaPricingGen(BasePricingGen):
@@ -21,6 +24,7 @@ class OandaPricingGen(BasePricingGen):
         priority_queue: PriorityQueue,
         run_flag: Event,
         exit_flag: Event,
+        save_to_file: bool = None,
     ):
         super().__init__()
         self.instruments = instruments
@@ -29,9 +33,13 @@ class OandaPricingGen(BasePricingGen):
         self.queue = priority_queue
         self.run_flag = run_flag
         self.exit_flag = exit_flag
+        self.save_to_file = save_to_file
 
     def gen(self):
         try:
+            if self.save_to_file:
+                save_file = open(history_filepath("currently_collecting.txt"), "w")
+                start_time = datetime.now()
             all_instruments = extend_instrument_list(
                 self.instruments, self.account_currency
             )
@@ -54,6 +62,17 @@ class OandaPricingGen(BasePricingGen):
                         Decimal(price["asks"][0]["price"]),
                     )
                 self.queue.put(event)
+                if self.save_to_file:
+                    save_file.write(repr(event) + "\n")
+                    save_file.flush()
+            if self.save_to_file:
+                save_file.close()
+                end_time = datetime.now()
+                cur_file_name = history_filepath("currently_collecting.txt", delete=False)
+                save_file_name = history_filepath(standard_filename(start_time, end_time))
+                cur_file_name.rename(save_file_name)
+        except FileNotFoundError:
+            pass
         except Exception:
             self.exit_flag.set()
             raise

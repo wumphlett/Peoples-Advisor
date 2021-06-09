@@ -722,15 +722,15 @@ class CLI:
                             ("class:info", "Info"),
                             ("", ": Starting People's Advisor on "),
                             ("class:info", "PAPER"),
-                            ("", "account with "),
-                            ("class:info", str(type(LIVE_STRATEGIES[0]))),
+                            ("", " account with "),
+                            ("class:info", type(LIVE_STRATEGIES[0]).__name__),
                             ("", ", "),
-                            ("class:info", str(type(LIVE_STRATEGIES[1]))),
+                            ("class:info", type(LIVE_STRATEGIES[1]).__name__),
                         ]
                     )
                     print(start_message, style=style, color_depth=TRUE_COLOR)
                 else:
-                    strategies = f"{str(type(LIVE_STRATEGIES[0]))}, {str(type(LIVE_STRATEGIES[1]))}"
+                    strategies = f"{type(LIVE_STRATEGIES[0]).__name__}, {type(LIVE_STRATEGIES[1]).__name__}"
                     print(
                         f"Info: Starting People's Advisor on PAPER account with {strategies}"
                     )
@@ -778,15 +778,15 @@ class CLI:
                             ("class:info", "Info"),
                             ("", ": Starting People's Advisor on "),
                             ("class:warning", "LIVE"),
-                            ("", "account with "),
-                            ("class:info", str(type(LIVE_STRATEGIES[0]))),
+                            ("", " account with "),
+                            ("class:info", type(LIVE_STRATEGIES[0]).__name__),
                             ("", ", "),
-                            ("class:info", str(type(LIVE_STRATEGIES[1]))),
+                            ("class:info", type(LIVE_STRATEGIES[1]).__name__),
                         ]
                     )
                     print(start_message, style=style, color_depth=TRUE_COLOR)
                 else:
-                    strategies = f"{str(type(LIVE_STRATEGIES[0]))}, {str(type(LIVE_STRATEGIES[1]))}"
+                    strategies = f"{type(LIVE_STRATEGIES[0]).__name__}, {type(LIVE_STRATEGIES[1]).__name__}"
                     print(
                         f"Info: Starting People's Advisor on LIVE account with {strategies}"
                     )
