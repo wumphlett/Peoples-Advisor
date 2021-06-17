@@ -19,7 +19,7 @@ from prompt_toolkit.shortcuts import ProgressBar
 from prompt_toolkit.shortcuts.progress_bar import formatters
 from prompt_toolkit.styles import Style
 
-from peoples_advisor.backtest.backtest import get_historical_gen, get_backtesting_gen
+from peoples_advisor.backtest.backtest import historical_gen_factory, backtesting_gen_factory
 from peoples_advisor.backtest.common.common import filesize
 from peoples_advisor.control.control import Control
 from peoples_advisor.event.event import StartEvent, StopEvent, ExitEvent
@@ -843,7 +843,7 @@ class CLI:
     def history(from_datetime, to_datetime, granularity, filename=None):
         if filename:
             filename += ".txt"
-        historical_data = get_historical_gen(from_datetime, to_datetime, granularity, filename)
+        historical_data = historical_gen_factory(from_datetime, to_datetime, granularity, filename)
         filename = filename if filename else historical_data.filename
         if TERMINAL_COLORS:
             color_formatters = [
@@ -946,7 +946,7 @@ class CLI:
                     ]
                 )
                 with ProgressBar(formatters=color_formatters, style=style, color_depth=TRUE_COLOR) as pb:
-                    historical_gen = get_backtesting_gen(
+                    historical_gen = backtesting_gen_factory(
                         control.events,
                         control.run_flag,
                         data_path,
@@ -997,7 +997,7 @@ class CLI:
                 label = str(type(strategy_pair[0])).split(".")[-1][:-2] + ", "
                 label += str(type(strategy_pair[1])).split(".")[-1][:-2]
                 with ProgressBar(formatters=base_formatters, style=style, color_depth=TRUE_COLOR) as pb:
-                    historical_gen = get_backtesting_gen(control.events, control.run_flag, data_path)
+                    historical_gen = backtesting_gen_factory(control.events, control.run_flag, data_path)
                     try:
                         for _ in pb(historical_gen.gen(), label=label, total=line_count):
                             pass

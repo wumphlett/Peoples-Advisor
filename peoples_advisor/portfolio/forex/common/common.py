@@ -14,7 +14,7 @@ class Portfolio:
         # In the form of {instrument_pair: {'bid': bid, 'ask': ask}}
         self.prices = {}
         self.orders = {}
-        # In the form of {instrument_pair: (units: Decimal, price bought/sold at: Decimal)}
+        # In the form of {instrument_pair: [(units: Decimal, price bought/sold at: Decimal),]}
         self.positions = {}
 
     def update_price(self, price: Union[PriceEvent, QuoteEvent]):
@@ -24,13 +24,14 @@ class Portfolio:
     @property
     def unrealized_pl(self):
         unrealized = Decimal(0)
-        for instrument, position in self.positions.items():
-            if position[0] < 0:
-                position_profit = position[0] * (position[1] - self.prices[instrument]["ask"])
-                unrealized += self._convert(ACCOUNT_CURRENCY, self.quote_currency(instrument), position_profit)
-            elif position[0] > 0:
-                position_profit = position[0] * (position[1] - self.prices[instrument]["bid"])
-                unrealized += self._convert(ACCOUNT_CURRENCY, self.quote_currency(instrument), position_profit)
+        for instrument, positions in self.positions.items():
+            for position in positions:
+                if position[0] < 0:
+                    position_profit = position[0] * (position[1] - self.prices[instrument]["ask"])
+                    unrealized += self._convert(ACCOUNT_CURRENCY, self.quote_currency(instrument), position_profit)
+                elif position[0] > 0:
+                    position_profit = position[0] * (position[1] - self.prices[instrument]["bid"])
+                    unrealized += self._convert(ACCOUNT_CURRENCY, self.quote_currency(instrument), position_profit)
         return unrealized
 
     @property

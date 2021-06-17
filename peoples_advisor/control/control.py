@@ -2,7 +2,7 @@ from queue import PriorityQueue
 from threading import Thread, Event
 
 from peoples_advisor.event.event import ExitEvent, BaseEvent
-from peoples_advisor.price.price import get_pricing_gen
+from peoples_advisor.price.price import pricing_gen_factory
 #from peoples_advisor.portfolio.portfolio import Portfolio
 from peoples_advisor.signal.signal import SignalStrategy
 from peoples_advisor.sizing.sizing import SizingStrategy
@@ -20,7 +20,7 @@ class Control:
         self.events = PriorityQueue()
         self.backtesting = backtesting
         self.pricing_stream = Thread(
-            target=get_pricing_gen(self.events, self.exit_flag).gen,
+            target=pricing_gen_factory(self.events, self.exit_flag).gen,
             daemon=True,
         )
         #self.portfolio = Portfolio()
