@@ -56,9 +56,7 @@ splash_screen = """\n \
                                  (github.com/Wumphlett/Peoples-Advisor)
     """
 
-datetime_pattern = (
-    r"\([12][90][0-9][0-9],[01]?[0-9],[0123]?[0-9](?:,[0-9]?[0-9]){0,3}\)"
-)
+datetime_pattern = r"\([12][90][0-9][0-9],[01]?[0-9],[0123]?[0-9](?:,[0-9]?[0-9]){0,3}\)"
 
 allowed_grans = [
     "S5",
@@ -235,9 +233,7 @@ class CLI:
     def cli_datetime(datetime_string):
         datetime_match = re.match(datetime_pattern, datetime_string)
         if not datetime_match:
-            raise argparse.ArgumentTypeError(
-                f"{datetime_string} is not a valid datetime string"
-            )
+            raise argparse.ArgumentTypeError(f"{datetime_string} is not a valid datetime string")
         else:
             init_list = [int(x) for x in datetime_string[1:-1].split(",")]
             while len(init_list) < 6:
@@ -254,9 +250,7 @@ class CLI:
     @staticmethod
     def cli_granularity(gran_string):
         if gran_string not in allowed_grans:
-            raise argparse.ArgumentTypeError(
-                f"{gran_string} is not a valid granularity string"
-            )
+            raise argparse.ArgumentTypeError(f"{gran_string} is not a valid granularity string")
         else:
             return gran_string
 
@@ -264,9 +258,7 @@ class CLI:
     def cli_filename(filename_string):
         filename_match = re.match(r"[a-zA-Z-_\[\].]+", filename_string)
         if not filename_match:
-            raise argparse.ArgumentTypeError(
-                f"{filename_string} is not a valid filename string"
-            )
+            raise argparse.ArgumentTypeError(f"{filename_string} is not a valid filename string")
         else:
             return filename_string
 
@@ -274,9 +266,7 @@ class CLI:
     def backtest_filename(filename_string):
         data_path = Path(__file__).parents[1] / "data" / "history" / filename_string
         if not data_path.exists():
-            raise argparse.ArgumentTypeError(
-                f"{filename_string} is not a valid file in data/history/"
-            )
+            raise argparse.ArgumentTypeError(f"{filename_string} is not a valid file in data/history/")
         else:
             return data_path
 
@@ -334,17 +324,13 @@ class CLI:
             print(color_start_usage, style=style, color_depth=TRUE_COLOR)
         else:
             peoples_usage = "\n    Usage: peoples_advisor> {start, stop, exit, history, backtest, deploy, help} ..."
-            peoples_usage += (
-                "\n      These commands allow you directly control People's Advisor"
-            )
+            peoples_usage += "\n      These commands allow you directly control People's Advisor"
             peoples_usage += "\n\n    Available Commands:"
             peoples_usage += "\n      start\tStart People's Advisor using the settings provided in settings.py"
             peoples_usage += "\n      stop\tStop People's Advisor"
             peoples_usage += "\n      exit\tExit People's Advisor"
             peoples_usage += "\n      history\tGather historical data for backtesting"
-            peoples_usage += (
-                "\n      backtest\tBacktest the algorithms provided in settings.py"
-            )
+            peoples_usage += "\n      backtest\tBacktest the algorithms provided in settings.py"
             peoples_usage += "\n      deploy\tDeploy the algorithms provided in settings.py on a paper or live account"
             peoples_usage += "\n      help\tDisplay this help message\n"
             print(peoples_usage)
@@ -385,9 +371,7 @@ class CLI:
             start_usage = "\n    Usage: start [-h, -y]"
             start_usage += "\n      Start People's Advisor using the settings provided in settings.py"
             start_usage += "\n\n    Optional Arguments:"
-            start_usage += (
-                "\n      -y, --yes   Do not prompt for confirmation when running live"
-            )
+            start_usage += "\n      -y, --yes   Do not prompt for confirmation when running live"
             start_usage += "\n      -h, --help  Display this help message\n"
             print(start_usage)
 
@@ -526,18 +510,12 @@ class CLI:
             print(color_history_usage, style=style, color_depth=TRUE_COLOR)
         else:
             history_usage = "\n    Usage: history FROM TO [-g GRANULARITY, -h]"
-            history_usage += (
-                "\n      Gather historical data for backtesting given a time range"
-            )
+            history_usage += "\n      Gather historical data for backtesting given a time range"
             history_usage += "\n\n    Required Arguments:"
             history_usage += "\n      FROM   The start of the time range to gather historical data for"
             history_usage += "\n        Given as (YYYY,MM,DD[,HH,MM,SS]) ex. (2021,1,1)"
-            history_usage += (
-                "\n      TO     The end of the time range to gather historical data for"
-            )
-            history_usage += (
-                "\n        Given as (YYYY,MM,DD[,HH,MM,SS]) ex. (2021,2,1,20,30)"
-            )
+            history_usage += "\n      TO     The end of the time range to gather historical data for"
+            history_usage += "\n        Given as (YYYY,MM,DD[,HH,MM,SS]) ex. (2021,2,1,20,30)"
             history_usage += "\n\n    Optional Arguments:"
             history_usage += "\n      -g GRANULARITY Specify a granularity to use when gathering historical data"
             history_usage += "\n      -a FILENAME    Specify an alternative filename to save the historical data under"
@@ -585,14 +563,10 @@ class CLI:
             print(color_backtest_usage, style=style, color_depth=TRUE_COLOR)
         else:
             backtest_usage = "\n    Usage: backtest [-h]"
-            backtest_usage += (
-                "\n      Backtest all algorithm pairs provided in settings.py"
-            )
+            backtest_usage += "\n      Backtest all algorithm pairs provided in settings.py"
             backtest_usage += "\n\n    Required Arguments:"
             backtest_usage += "\n      HISTORY_FILE   The historical data file to backtest your algorithms against"
-            backtest_usage += (
-                "\n        ex. 2021.04.01-2021.05.01[EUR_USD-GBP_USD-EUR_JPY].txt"
-            )
+            backtest_usage += "\n        ex. 2021.04.01-2021.05.01[EUR_USD-GBP_USD-EUR_JPY].txt"
             backtest_usage += "\n\n    Optional Arguments:"
             backtest_usage += "\n      -h, --help  Display this help message\n"
             print(backtest_usage)
@@ -616,9 +590,7 @@ class CLI:
                     ]
                 )
             elif error_message.startswith("argument command: invalid choice: "):
-                error_message = error_message.replace(
-                    "argument command: invalid choice: ", "invalid command: "
-                )
+                error_message = error_message.replace("argument command: invalid choice: ", "invalid command: ")
                 color_error_message = FormattedText(
                     [
                         ("class:warning", "    Error"),
@@ -641,9 +613,7 @@ class CLI:
                     ]
                 )
             elif error_message.startswith("the following arguments are required: "):
-                req_args = error_message.replace(
-                    "the following arguments are required: ", ""
-                ).split(", ")
+                req_args = error_message.replace("the following arguments are required: ", "").split(", ")
                 format_args = []
                 for arg in req_args:
                     format_args.append(("class:variable", arg))
@@ -690,9 +660,7 @@ class CLI:
             if error_message.startswith("unrecognized arguments:"):
                 error_message = "    Error: " + error_message + "\n"
             elif error_message.startswith("argument command: invalid choice: "):
-                error_message = error_message.replace(
-                    "argument command: invalid choice: ", "invalid command: "
-                )
+                error_message = error_message.replace("argument command: invalid choice: ", "invalid command: ")
                 error_message = "    Error: " + error_message + "\n"
             elif error_message.startswith("the following arguments are required: "):
                 error_message = "    Error: " + error_message + "\n"
@@ -731,9 +699,7 @@ class CLI:
                     print(start_message, style=style, color_depth=TRUE_COLOR)
                 else:
                     strategies = f"{type(LIVE_STRATEGIES[0]).__name__}, {type(LIVE_STRATEGIES[1]).__name__}"
-                    print(
-                        f"Info: Starting People's Advisor on PAPER account with {strategies}"
-                    )
+                    print(f"Info: Starting People's Advisor on PAPER account with {strategies}")
                 self.control.queue_event(StartEvent())
             else:
                 if not yes:
@@ -750,9 +716,7 @@ class CLI:
                         )
                         print(warning_message, style=style, color_depth=TRUE_COLOR)
                     else:
-                        print(
-                            "WARNING: YOU ARE STARTING PEOPLE'S ADVISOR ON A LIVE ACCOUNT!"
-                        )
+                        print("WARNING: YOU ARE STARTING PEOPLE'S ADVISOR ON A LIVE ACCOUNT!")
                         print("    ARE YOU SURE YOU WISH TO PROCEED? (Y/n): ")
                     confirmation = input()
                     if confirmation != "Y":
@@ -787,9 +751,7 @@ class CLI:
                     print(start_message, style=style, color_depth=TRUE_COLOR)
                 else:
                     strategies = f"{type(LIVE_STRATEGIES[0]).__name__}, {type(LIVE_STRATEGIES[1]).__name__}"
-                    print(
-                        f"Info: Starting People's Advisor on LIVE account with {strategies}"
-                    )
+                    print(f"Info: Starting People's Advisor on LIVE account with {strategies}")
                 self.control.queue_event(StartEvent())
 
     def stop(self):
@@ -836,9 +798,7 @@ class CLI:
                 exit_message += " It is recommended you run the stop command before the exit command."
                 print(exit_message)
             with patch_stdout():
-                prompt = self.session.prompt(
-                    "Are you sure you wish to continue and perform a hard stop? (Y/n): "
-                )
+                prompt = self.session.prompt("Are you sure you wish to continue and perform a hard stop? (Y/n): ")
             if prompt[0] == "Y":
                 if TERMINAL_COLORS:
                     exit_message = FormattedText(
@@ -883,9 +843,7 @@ class CLI:
     def history(from_datetime, to_datetime, granularity, filename=None):
         if filename:
             filename += ".txt"
-        historical_data = get_historical_gen(
-            from_datetime, to_datetime, granularity, filename
-        )
+        historical_data = get_historical_gen(from_datetime, to_datetime, granularity, filename)
         filename = filename if filename else historical_data.filename
         if TERMINAL_COLORS:
             color_formatters = [
@@ -897,9 +855,7 @@ class CLI:
                 formatters.Text(" data-points/second"),
                 formatters.Text("  "),
             ]
-            with ProgressBar(
-                style=style, formatters=color_formatters, color_depth=TRUE_COLOR
-            ) as pb:
+            with ProgressBar(style=style, formatters=color_formatters, color_depth=TRUE_COLOR) as pb:
                 try:
                     count = 0
                     for _ in pb(historical_data.gen()):
@@ -931,11 +887,7 @@ class CLI:
                         count += 1
                 except ZeroDivisionError:
                     pass
-            print(
-                "Info: Data saved to data/history/"
-                + filename
-                + f" ({count} data-points)"
-            )
+            print("Info: Data saved to data/history/" + filename + f" ({count} data-points)")
 
     @staticmethod
     def backtest(data_path):
@@ -950,9 +902,7 @@ class CLI:
                 formatters.Text(" data-points/second"),
                 formatters.Text("  "),
             ]
-            with ProgressBar(
-                style=style, formatters=color_formatters, color_depth=TRUE_COLOR
-            ) as pb:
+            with ProgressBar(style=style, formatters=color_formatters, color_depth=TRUE_COLOR) as pb:
                 try:
                     for _ in pb(filesize(data_path)):
                         line_count += 1
@@ -995,9 +945,7 @@ class CLI:
                         ),
                     ]
                 )
-                with ProgressBar(
-                    formatters=color_formatters, style=style, color_depth=TRUE_COLOR
-                ) as pb:
+                with ProgressBar(formatters=color_formatters, style=style, color_depth=TRUE_COLOR) as pb:
                     historical_gen = get_backtesting_gen(
                         control.events,
                         control.run_flag,
@@ -1048,16 +996,10 @@ class CLI:
                 control.queue_event(StartEvent())
                 label = str(type(strategy_pair[0])).split(".")[-1][:-2] + ", "
                 label += str(type(strategy_pair[1])).split(".")[-1][:-2]
-                with ProgressBar(
-                    formatters=base_formatters, style=style, color_depth=TRUE_COLOR
-                ) as pb:
-                    historical_gen = get_backtesting_gen(
-                        control.events, control.run_flag, data_path
-                    )
+                with ProgressBar(formatters=base_formatters, style=style, color_depth=TRUE_COLOR) as pb:
+                    historical_gen = get_backtesting_gen(control.events, control.run_flag, data_path)
                     try:
-                        for _ in pb(
-                            historical_gen.gen(), label=label, total=line_count
-                        ):
+                        for _ in pb(historical_gen.gen(), label=label, total=line_count):
                             pass
                     except ZeroDivisionError:
                         pass
@@ -1081,7 +1023,7 @@ class CLI:
                 with patch_stdout():
                     if TERMINAL_COLORS:
                         prompt = self.session.prompt(
-                            FormattedText([("class:prompt", "peoples_advisor> ")]),
+                            FormattedText([("class:prompt", "pa> ")]),
                             style=style,
                             color_depth=TRUE_COLOR,
                             completer=NestedCLiCompleter(),
@@ -1090,7 +1032,7 @@ class CLI:
                         )
                     else:
                         prompt = self.session.prompt(
-                            "peoples_advisor> ",
+                            "pa> ",
                             completer=NestedCLiCompleter(),
                             complete_while_typing=True,
                         )
@@ -1124,9 +1066,7 @@ class CLI:
                 elif args.command == "exit":
                     self.exit()
                 elif args.command == "history":
-                    self.history(
-                        args.from_time, args.to_time, args.granularity, args.alias
-                    )
+                    self.history(args.from_time, args.to_time, args.granularity, args.alias)
                 elif args.command == "backtest":
                     self.backtest(args.data_file)
                 elif args.command == "deploy":

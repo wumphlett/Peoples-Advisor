@@ -22,7 +22,6 @@ class OandaPricingGen(BasePricingGen):
         instruments: List[str],
         account_currency: str,
         priority_queue: PriorityQueue,
-        run_flag: Event,
         exit_flag: Event,
         save_to_file: bool = None,
     ):
@@ -31,7 +30,6 @@ class OandaPricingGen(BasePricingGen):
         self.account_currency = account_currency
         self.api = OandaApi(api_token, live, account_index, datetime_format)
         self.queue = priority_queue
-        self.run_flag = run_flag
         self.exit_flag = exit_flag
         self.save_to_file = save_to_file
 
@@ -40,12 +38,10 @@ class OandaPricingGen(BasePricingGen):
             if self.save_to_file:
                 save_file = open(history_filepath("currently_collecting.txt"), "w")
                 start_time = datetime.now()
-            all_instruments = extend_instrument_list(
-                self.instruments, self.account_currency
-            )
+            all_instruments = extend_instrument_list(self.instruments, self.account_currency)
             pricing_stream = self.api.pricing_stream(all_instruments)
             for price in pricing_stream:
-                if not self.run_flag.is_set():
+                if self.exit_flag.is_set():
                     break
                 if price["instrument"] in self.instruments:
                     event = PriceEvent(

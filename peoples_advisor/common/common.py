@@ -25,42 +25,31 @@ def validate_settings():
             raise PAError("DATETIME_FORMAT must be in ['RFC3339', 'UNIX']")
     if BROKER == "OANDA":
         api = get_api()
-        instruments = [
-            instrument["name"]
-            for instrument in api.get_account_instruments()["instruments"]
-        ]
+        instruments = [instrument["name"] for instrument in api.get_account_instruments()["instruments"]]
         for instrument in INSTRUMENTS:
             if instrument not in instruments:
                 raise PAError(f"Invalid instrument ({instrument}) in INSTRUMENTS")
     else:
         pass
+    if type(INSTRUMENT_TYPE) is not str or INSTRUMENT_TYPE not in ["FOREX"]:
+        raise PAError("INSTRUMENT_TYPE must be a str and a valid option")
     if LEVERAGE > 1 or LEVERAGE <= 0:
         raise PAError("LEVERAGE must be in the range (0, 1]")
     if type(LEVERAGE) != Decimal:
         raise PAError("LEVERAGE must be of type Decimal")
     if type(LIVE_STRATEGIES) is not tuple:
-        raise PAError(
-            "LIVE_STRATEGIES must be a tuple containing a signal and sizing strategy"
-        )
+        raise PAError("LIVE_STRATEGIES must be a tuple containing a signal and sizing strategy")
     if not issubclass(type(LIVE_STRATEGIES[0]), SignalStrategy):
         raise PAError("The first entry in LIVE_STRATEGIES must subclass SignalStrategy")
     if not issubclass(type(LIVE_STRATEGIES[1]), SizingStrategy):
-        raise PAError(
-            "The second entry in LIVE_STRATEGIES must subclass SizingStrategy"
-        )
+        raise PAError("The second entry in LIVE_STRATEGIES must subclass SizingStrategy")
     for strategy_pair in BACKTEST_STRATEGIES:
         if type(strategy_pair) is not tuple:
-            raise PAError(
-                "Each entry in BACKTEST_STRATEGIES must be a tuple containing a signal and sizing strategy"
-            )
+            raise PAError("Each entry in BACKTEST_STRATEGIES must be a tuple containing a signal and sizing strategy")
         if not issubclass(type(LIVE_STRATEGIES[0]), SignalStrategy):
-            raise PAError(
-                "The first entry in each tuple in BACKTEST_STRATEGIES must subclass SignalStrategy"
-            )
+            raise PAError("The first entry in each tuple in BACKTEST_STRATEGIES must subclass SignalStrategy")
         if not issubclass(type(LIVE_STRATEGIES[1]), SizingStrategy):
-            raise PAError(
-                "The second entry in each tuple in BACKTEST_STRATEGIES must subclass SizingStrategy"
-            )
+            raise PAError("The second entry in each tuple in BACKTEST_STRATEGIES must subclass SizingStrategy")
     if BALANCE <= 0:
         raise PAError("BALANCE must be greater than 0")
     if type(SAVE_LIVE_AS_HISTORICAL) is not bool:
@@ -72,10 +61,7 @@ def validate_settings():
 def extend_instrument_list(instruments: List[str], account_currency: str) -> List[str]:
     if BROKER == "OANDA":
         api = get_api()
-        possible_instruments = [
-            instrument["name"]
-            for instrument in api.get_account_instruments()["instruments"]
-        ]
+        possible_instruments = [instrument["name"] for instrument in api.get_account_instruments()["instruments"]]
         final_instruments = []
         for instrument in instruments:
             if account_currency in instrument:
@@ -87,9 +73,7 @@ def extend_instrument_list(instruments: List[str], account_currency: str) -> Lis
                     elif f"{account_currency}_{currency}" in possible_instruments:
                         final_instruments.append(f"{account_currency}_{currency}")
                     else:
-                        raise PAError(
-                            f"Impossible currency pair for {account_currency} and {currency}"
-                        )
+                        raise PAError(f"Impossible currency pair for {account_currency} and {currency}")
             final_instruments.append(instrument)
         return list(set(final_instruments))
 

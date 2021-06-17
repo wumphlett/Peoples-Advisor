@@ -32,8 +32,6 @@ class TestSizingStrategy(SizingStrategy):
             inst = signal.instrument
             sign = 1 if signal.side == "BUY" else -1
             units = Decimal(100) * sign
-            return OrderEvent(
-                inst, signal.time, units, MarketOrderRequest(inst, float(units))
-            )
+            return OrderEvent(inst, signal.time, units, MarketOrderRequest(inst, float(units)))
         else:
             return

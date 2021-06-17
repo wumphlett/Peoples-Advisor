@@ -15,9 +15,7 @@ from peoples_advisor.settings import (
 )
 
 
-def get_backtesting_gen(
-    priority_queue: PriorityQueue, run_flag: Event, data_path: Path
-):
+def get_backtesting_gen(priority_queue: PriorityQueue, run_flag: Event, data_path: Path):
     if BROKER == "OANDA":
         return OandaBacktestingGen(priority_queue, run_flag, data_path)
     else:

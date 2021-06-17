@@ -41,9 +41,7 @@ class OandaBacktestingData(BaseBacktestingData):
     def gen(self):
         start = self.from_datetime.timestamp()
         end = self.to_datetime.timestamp()
-        all_instruments = extend_instrument_list(
-            self.instruments, self.account_currency
-        )
+        all_instruments = extend_instrument_list(self.instruments, self.account_currency)
         prices, spreads, pointers = {}, {}, {}
         # Initialize the first page of prices for each instrument and initialize the pointers to walk the lists
         for instrument in all_instruments:
@@ -53,13 +51,7 @@ class OandaBacktestingData(BaseBacktestingData):
             candles = candles.get("candles")
             if len(candles) > 0:
                 prices.update({instrument: candles})
-                spreads.update(
-                    {
-                        instrument: get_historical_spreads(
-                            instrument, since=self.from_datetime
-                        )
-                    }
-                )
+                spreads.update({instrument: get_historical_spreads(instrument, since=self.from_datetime)})
                 pointers.update({instrument: {"price": 0, "spread": 0}})
 
         with open(self.filepath, "w") as f:
@@ -69,9 +61,7 @@ class OandaBacktestingData(BaseBacktestingData):
                 rem_list = []
                 for inst in prices:
                     if pointers[inst]["price"] < len(prices[inst]):
-                        cur_price_time = float(
-                            prices[inst][pointers[inst]["price"]]["time"]
-                        )
+                        cur_price_time = float(prices[inst][pointers[inst]["price"]]["time"])
                         if cur_price_time < end:
                             earliest.append((cur_price_time, inst))
                         else:  # The times for a given instrument has exceeded the end time, remove from prices dict
@@ -104,23 +94,16 @@ class OandaBacktestingData(BaseBacktestingData):
                     # Therefore, there is no need to paginate as was done with the prices
                     while (
                         pointers[next_inst]["spread"] + 1 < len(spreads[next_inst])
-                        and spreads[next_inst][pointers[next_inst]["spread"]][0]
-                        < next_time
+                        and spreads[next_inst][pointers[next_inst]["spread"]][0] < next_time
                     ):
                         # Advance spread pointer to the appropriate spread value
                         pointers[next_inst]["spread"] += 1
                     # Calculate the spread in price units
-                    price_str = prices[next_inst][pointers[next_inst]["price"]]["mid"][
-                        "c"
-                    ]
-                    pip_spread = Decimal(
-                        spreads[next_inst][pointers[next_inst]["spread"]][1]
-                    ) / Decimal(2)
+                    price_str = prices[next_inst][pointers[next_inst]["price"]]["mid"]["c"]
+                    pip_spread = Decimal(spreads[next_inst][pointers[next_inst]["spread"]][1]) / Decimal(2)
                     place = len(price_str.split(".")[1]) - 1
                     # Calculate the price
-                    price = Decimal(
-                        prices[next_inst][pointers[next_inst]["price"]]["mid"]["c"]
-                    )
+                    price = Decimal(prices[next_inst][pointers[next_inst]["price"]]["mid"]["c"])
                     spread = pip_spread * (Decimal("10") ** -place)
                     # Write price to file
                     # This approximates bid and ask for a given candle using its closing price and the spread

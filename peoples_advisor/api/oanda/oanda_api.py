@@ -72,19 +72,13 @@ class TakeProfitDetails:
         self.price = price
         self.time_in_force = time_in_force
         self.gtd_time = gtd_time
-        self.client_extensions = (
-            client_extensions.as_dict() if client_extensions is not None else None
-        )
+        self.client_extensions = client_extensions.as_dict() if client_extensions is not None else None
 
     def as_dict(self):
         tpd_dict = {"price": str(self.price), "timeInForce": self.time_in_force}
         if self.time_in_force == "GTD" and self.gtd_time is None:
-            raise OandaError(
-                "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
-            )
-        _conditional_update(
-            tpd_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
-        )
+            raise OandaError("Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time")
+        _conditional_update(tpd_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
         tpd_dict.update(self.client_extensions if self.client_extensions else {})
         return tpd_dict
 
@@ -125,21 +119,15 @@ class StopLossDetails:
         self.distance = distance
         self.time_in_force = time_in_force
         self.gtd_time = gtd_time
-        self.client_extensions = (
-            client_extensions.as_dict() if client_extensions is not None else None
-        )
+        self.client_extensions = client_extensions.as_dict() if client_extensions is not None else None
 
     def as_dict(self):
         sl_dict = {"timeInForce": self.time_in_force}
         sl_dict.update({"price": str(self.price)} if self.price else {})
         sl_dict.update({"distance": str(self.distance)} if self.distance else {})
         if self.time_in_force == "GTD" and self.gtd_time is None:
-            raise OandaError(
-                "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
-            )
-        _conditional_update(
-            sl_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
-        )
+            raise OandaError("Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time")
+        _conditional_update(sl_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
         sl_dict.update(self.client_extensions if self.client_extensions else {})
         return sl_dict
 
@@ -180,21 +168,15 @@ class GuaranteedStopLossDetails:
         self.distance = distance
         self.time_in_force = time_in_force
         self.gtd_time = gtd_time
-        self.client_extensions = (
-            client_extensions.as_dict() if client_extensions is not None else None
-        )
+        self.client_extensions = client_extensions.as_dict() if client_extensions is not None else None
 
     def as_dict(self):
         gsl_dict = {"timeInForce": self.time_in_force}
         gsl_dict.update({"price": str(self.price)} if self.price else {})
         gsl_dict.update({"distance": str(self.distance)} if self.distance else {})
         if self.time_in_force == "GTD" and self.gtd_time is None:
-            raise OandaError(
-                "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
-            )
-        _conditional_update(
-            gsl_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
-        )
+            raise OandaError("Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time")
+        _conditional_update(gsl_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
         gsl_dict.update(self.client_extensions if self.client_extensions else {})
         return gsl_dict
 
@@ -227,20 +209,14 @@ class TrailingStopLossDetails:
         self.distance = distance
         self.time_in_force = time_in_force
         self.gtd_time = gtd_time
-        self.client_extensions = (
-            client_extensions.as_dict() if client_extensions is not None else None
-        )
+        self.client_extensions = client_extensions.as_dict() if client_extensions is not None else None
 
     def as_dict(self):
         tsl_dict = {"timeInForce": self.time_in_force}
         tsl_dict.update({"distance": str(self.distance)} if self.distance else {})
         if self.time_in_force == "GTD" and self.gtd_time is None:
-            raise OandaError(
-                "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
-            )
-        _conditional_update(
-            tsl_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
-        )
+            raise OandaError("Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time")
+        _conditional_update(tsl_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
         tsl_dict.update(self.client_extensions if self.client_extensions else {})
         return tsl_dict
 
@@ -325,9 +301,7 @@ class MarketOrderRequest(OrderRequest):
             "timeInForce": self.time_in_force,
             "positionFill": self.position_fill,
         }
-        _conditional_update(
-            mor_dict, self.price_floor, "priceBound", str(self.price_floor)
-        )
+        _conditional_update(mor_dict, self.price_floor, "priceBound", str(self.price_floor))
         _conditional_update(
             mor_dict,
             self.take_profit_on_fill,
@@ -447,12 +421,8 @@ class LimitOrderRequest(OrderRequest):
             "triggerCondition": self.trigger_condition,
         }
         if self.time_in_force == "GTD" and self.gtd_time is None:
-            raise OandaError(
-                "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
-            )
-        _conditional_update(
-            lor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
-        )
+            raise OandaError("Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time")
+        _conditional_update(lor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
         _conditional_update(
             lor_dict,
             self.take_profit_on_fill,
@@ -576,15 +546,9 @@ class StopOrderRequest(OrderRequest):
             "triggerCondition": self.trigger_condition,
         }
         if self.time_in_force == "GTD" and self.gtd_time is None:
-            raise OandaError(
-                "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
-            )
-        _conditional_update(
-            sor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
-        )
-        _conditional_update(
-            sor_dict, self.price_floor, "priceBound", str(self.price_floor)
-        )
+            raise OandaError("Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time")
+        _conditional_update(sor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
+        _conditional_update(sor_dict, self.price_floor, "priceBound", str(self.price_floor))
         _conditional_update(
             sor_dict,
             self.take_profit_on_fill,
@@ -709,15 +673,9 @@ class MarketIfTouchedOrderRequest(OrderRequest):
             "triggerCondition": self.trigger_condition,
         }
         if self.time_in_force == "GTD" and self.gtd_time is None:
-            raise OandaError(
-                "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
-            )
-        _conditional_update(
-            motor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
-        )
-        _conditional_update(
-            motor_dict, self.price_floor, "priceBound", str(self.price_floor)
-        )
+            raise OandaError("Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time")
+        _conditional_update(motor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
+        _conditional_update(motor_dict, self.price_floor, "priceBound", str(self.price_floor))
         _conditional_update(
             motor_dict,
             self.take_profit_on_fill,
@@ -807,15 +765,9 @@ class TakeProfitOrderRequest(OrderRequest):
             "triggerCondition": self.trigger_condition,
         }
         if self.time_in_force == "GTD" and self.gtd_time is None:
-            raise OandaError(
-                "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
-            )
-        _conditional_update(
-            tpor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
-        )
-        _conditional_update(
-            tpor_dict, self.client_trade_id, "clientTradeID", self.client_trade_id
-        )
+            raise OandaError("Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time")
+        _conditional_update(tpor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
+        _conditional_update(tpor_dict, self.client_trade_id, "clientTradeID", self.client_trade_id)
         _conditional_update(
             tpor_dict,
             self.client_extensions,
@@ -883,17 +835,11 @@ class StopLossOrderRequest(OrderRequest):
             "triggerCondition": self.trigger_condition,
         }
         if self.time_in_force == "GTD" and self.gtd_time is None:
-            raise OandaError(
-                "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
-            )
+            raise OandaError("Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time")
         slor_dict.update({"price": str(self.price)} if self.price else {})
         slor_dict.update({"distance": str(self.distance)} if self.distance else {})
-        _conditional_update(
-            slor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
-        )
-        _conditional_update(
-            slor_dict, self.client_trade_id, "clientTradeID", self.client_trade_id
-        )
+        _conditional_update(slor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
+        _conditional_update(slor_dict, self.client_trade_id, "clientTradeID", self.client_trade_id)
         _conditional_update(
             slor_dict,
             self.client_extensions,
@@ -963,17 +909,11 @@ class GuaranteedStopLossOrderRequest(OrderRequest):
             "triggerCondition": self.trigger_condition,
         }
         if self.time_in_force == "GTD" and self.gtd_time is None:
-            raise OandaError(
-                "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
-            )
+            raise OandaError("Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time")
         gslor_dict.update({"price": str(self.price)} if self.price else {})
         gslor_dict.update({"distance": str(self.distance)} if self.distance else {})
-        _conditional_update(
-            gslor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
-        )
-        _conditional_update(
-            gslor_dict, self.client_trade_id, "clientTradeID", self.client_trade_id
-        )
+        _conditional_update(gslor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
+        _conditional_update(gslor_dict, self.client_trade_id, "clientTradeID", self.client_trade_id)
         _conditional_update(
             gslor_dict,
             self.client_extensions,
@@ -1033,16 +973,10 @@ class TrailingStopLossOrderRequest(OrderRequest):
             "triggerCondition": self.trigger_condition,
         }
         if self.time_in_force == "GTD" and self.gtd_time is None:
-            raise OandaError(
-                "Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time"
-            )
+            raise OandaError("Invalid GTD time provided. If time_in_force is GTD, you must specify a proper GTD time")
         tslor_dict.update({"distance": str(self.distance)} if self.distance else {})
-        _conditional_update(
-            tslor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time
-        )
-        _conditional_update(
-            tslor_dict, self.client_trade_id, "clientTradeID", self.client_trade_id
-        )
+        _conditional_update(tslor_dict, self.time_in_force == "GTD", "gtdTime", self.gtd_time)
+        _conditional_update(tslor_dict, self.client_trade_id, "clientTradeID", self.client_trade_id)
         _conditional_update(
             tslor_dict,
             self.client_extensions,
@@ -1102,9 +1036,7 @@ class OandaApi:
                 see InstrumentName in oanda_guide.txt
         """
         params = {"instruments": ",".join(instruments)} if instruments else None
-        return self._oanda_api_call(
-            "get", f"accounts/{self.account_id}/instruments", params=params
-        )
+        return self._oanda_api_call("get", f"accounts/{self.account_id}/instruments", params=params)
 
     def get_account_changes(self, since_transaction: int) -> dict:
         """
@@ -1115,13 +1047,9 @@ class OandaApi:
                 see TransactionID in oanda_guide.txt
         """
         params = {"sinceTransactionID": str(since_transaction)}
-        return self._oanda_api_call(
-            "get", f"accounts/{self.account_id}/changes", params=params
-        )
+        return self._oanda_api_call("get", f"accounts/{self.account_id}/changes", params=params)
 
-    def configure_account(
-        self, alias: Optional[str] = None, margin_rate: Optional[float] = None
-    ) -> dict:
+    def configure_account(self, alias: Optional[str] = None, margin_rate: Optional[float] = None) -> dict:
         """
         Configure the alias and/or the margin rate for the account
 
@@ -1133,9 +1061,7 @@ class OandaApi:
         data = {}
         data.update({"alias": alias} if alias else {})
         data.update({"marginRate": str(margin_rate)} if margin_rate else {})
-        return self._oanda_api_call(
-            "patch", f"accounts/{self.account_id}/configuration", data=data
-        )
+        return self._oanda_api_call("patch", f"accounts/{self.account_id}/configuration", data=data)
 
     def get_instrument_candles(
         self,
@@ -1276,16 +1202,12 @@ class OandaApi:
             params.update({"from": candles[-1]["time"]})
             start = self.oanda_time_to_datetime(candles[-1]["time"])
             for candle in candles:
-                if (
-                    self.oanda_time_to_datetime(candle["time"]) < end
-                ):  # Strip Z and last 3 nanosecond digits
+                if self.oanda_time_to_datetime(candle["time"]) < end:  # Strip Z and last 3 nanosecond digits
                     yield candle
                 else:
                     break
 
-    def get_instrument_order_book(
-        self, instrument: str, time: Optional[str] = None
-    ) -> dict:
+    def get_instrument_order_book(self, instrument: str, time: Optional[str] = None) -> dict:
         """
         Get an order book for an instrument
 
@@ -1297,13 +1219,9 @@ class OandaApi:
         """
         params = {}
         params.update({"time": time} if time else {})
-        return self._oanda_api_call(
-            "get", f"instruments/{instrument}/orderBook", params=params
-        )
+        return self._oanda_api_call("get", f"instruments/{instrument}/orderBook", params=params)
 
-    def get_instrument_position_book(
-        self, instrument: str, time: Optional[str] = None
-    ) -> dict:
+    def get_instrument_position_book(self, instrument: str, time: Optional[str] = None) -> dict:
         """
         Get a position book for an instrument
 
@@ -1315,9 +1233,7 @@ class OandaApi:
         """
         params = {}
         params.update({"time": time} if time else {})
-        return self._oanda_api_call(
-            "get", f"instruments/{instrument}/positionBook", params=params
-        )
+        return self._oanda_api_call("get", f"instruments/{instrument}/positionBook", params=params)
 
     def get_orders(
         self,
@@ -1343,16 +1259,12 @@ class OandaApi:
                 see OrderId in oanda_guide.txt
         """
         params = {}
-        params.update(
-            {"ids": ",".join([str(order_id) for order_id in ids])} if ids else {}
-        )
+        params.update({"ids": ",".join([str(order_id) for order_id in ids])} if ids else {})
         params.update({"state": state} if state else {})
         params.update({"instrument": instrument} if instrument else {})
         params.update({"count": str(count)} if count else {})
         params.update({"beforeID": str(before_id)} if before_id else {})
-        return self._oanda_api_call(
-            "get", f"accounts/{self.account_id}/orders", params=params
-        )
+        return self._oanda_api_call("get", f"accounts/{self.account_id}/orders", params=params)
 
     def get_pending_orders(self) -> dict:
         """
@@ -1368,9 +1280,7 @@ class OandaApi:
             order_id (int): The id of the order to retrieve details for
                 see OrderID in oanda_guide.txt
         """
-        return self._oanda_api_call(
-            "get", f"accounts/{self.account_id}/orders/{str(order_id)}"
-        )
+        return self._oanda_api_call("get", f"accounts/{self.account_id}/orders/{str(order_id)}")
 
     def create_order(self, order: OrderRequest) -> dict:
         """
@@ -1381,9 +1291,7 @@ class OandaApi:
                 NOTE: You may use any of the 8 available sub-classes of OrderRequest, but not OrderRequest itself
                 see OrderRequest in oanda_guide.txt
         """
-        return self._oanda_api_call(
-            "post", f"accounts/{self.account_id}/orders", data=order.as_dict()
-        )
+        return self._oanda_api_call("post", f"accounts/{self.account_id}/orders", data=order.as_dict())
 
     def replace_order(self, order_id: int, order: OrderRequest) -> dict:
         """
@@ -1410,9 +1318,7 @@ class OandaApi:
             order_id (int): The id of the order to cancel
                 see OrderID in oanda_guide.txt
         """
-        return self._oanda_api_call(
-            "put", f"accounts/{self.account_id}/orders/{str(order_id)}/cancel"
-        )
+        return self._oanda_api_call("put", f"accounts/{self.account_id}/orders/{str(order_id)}/cancel")
 
     def update_order_client_extensions(
         self,
@@ -1432,16 +1338,8 @@ class OandaApi:
                 see ClientExtensions in oanda_guide.txt
         """
         data = {}
-        data.update(
-            {"clientExtensions": client_extensions.as_dict()}
-            if client_extensions
-            else {}
-        )
-        data.update(
-            {"tradeClientExtensions": trade_client_extensions.as_dict()}
-            if trade_client_extensions
-            else {}
-        )
+        data.update({"clientExtensions": client_extensions.as_dict()} if client_extensions else {})
+        data.update({"tradeClientExtensions": trade_client_extensions.as_dict()} if trade_client_extensions else {})
         return self._oanda_api_call(
             "put",
             f"accounts/{self.account_id}/orders/{str(order_id)}/clientExtensions",
@@ -1472,16 +1370,12 @@ class OandaApi:
                 see TradeId in oanda_guide.txt
         """
         params = {}
-        params.update(
-            {"ids": ",".join([str(trade_id) for trade_id in ids])} if ids else {}
-        )
+        params.update({"ids": ",".join([str(trade_id) for trade_id in ids])} if ids else {})
         params.update({"state": state} if state else {})
         params.update({"instrument": instrument} if instrument else {})
         params.update({"count": str(count)} if count else {})
         params.update({"beforeID": str(before_id)} if before_id else {})
-        return self._oanda_api_call(
-            "get", f"accounts/{self.account_id}/trades", params=params
-        )
+        return self._oanda_api_call("get", f"accounts/{self.account_id}/trades", params=params)
 
     def get_open_trades(self) -> dict:
         """
@@ -1497,9 +1391,7 @@ class OandaApi:
             trade_id (int): The id of the trade to retrieve details for
                 see TradeId in oanda_guide.txt
         """
-        return self._oanda_api_call(
-            "get", f"accounts/{self.account_id}/trades/{str(trade_id)}"
-        )
+        return self._oanda_api_call("get", f"accounts/{self.account_id}/trades/{str(trade_id)}")
 
     def close_trade(self, trade_id: int, units: Optional[float] = None) -> dict:
         """
@@ -1514,9 +1406,7 @@ class OandaApi:
                 NOTE: This number must be positive
         """
         data = {"units": "ALL"} if units is None else {"units": str(units)}
-        return self._oanda_api_call(
-            "put", f"accounts/{self.account_id}/trades/{str(trade_id)}/close", data=data
-        )
+        return self._oanda_api_call("put", f"accounts/{self.account_id}/trades/{str(trade_id)}/close", data=data)
 
     def modify_trade_dependent_orders(
         self,
@@ -1524,9 +1414,7 @@ class OandaApi:
         take_profit: Optional[Union[str, TakeProfitDetails]] = "NO_CHANGE",
         stop_loss: Optional[Union[str, StopLossDetails]] = "NO_CHANGE",
         trailing_stop_loss: Optional[Union[str, TrailingStopLossDetails]] = "NO_CHANGE",
-        guaranteed_stop_loss: Optional[
-            Union[str, GuaranteedStopLossDetails]
-        ] = "NO_CHANGE",
+        guaranteed_stop_loss: Optional[Union[str, GuaranteedStopLossDetails]] = "NO_CHANGE",
     ) -> dict:
         """
         Create, replace, and cancel a trade's dependent orders (take profit, stop loss, and trailing stop loss)
@@ -1576,8 +1464,7 @@ class OandaApi:
         if type(guaranteed_stop_loss) == str and guaranteed_stop_loss != "NO_CHANGE":
             data.update(
                 {"guaranteedStopLoss": None}
-                if type(guaranteed_stop_loss) == str
-                and guaranteed_stop_loss == "CANCEL"
+                if type(guaranteed_stop_loss) == str and guaranteed_stop_loss == "CANCEL"
                 else {"guaranteedStopLoss": guaranteed_stop_loss.as_dict()}
             )
         return self._oanda_api_call(
@@ -1599,11 +1486,7 @@ class OandaApi:
                 see ClientExtensions in oanda_guide.txt
         """
         data = {}
-        data.update(
-            {"clientExtensions": client_extensions.as_dict()}
-            if client_extensions
-            else {}
-        )
+        data.update({"clientExtensions": client_extensions.as_dict()} if client_extensions else {})
         return self._oanda_api_call(
             "put",
             f"accounts/{self.account_id}/orders/{str(trade_id)}/clientExtensions",
@@ -1630,9 +1513,7 @@ class OandaApi:
             instrument (str): Name of the instrument
                 see InstrumentName in oanda_guide.txt
         """
-        return self._oanda_api_call(
-            "get", f"accounts/{self.account_id}/positions/{instrument}"
-        )
+        return self._oanda_api_call("get", f"accounts/{self.account_id}/positions/{instrument}")
 
     def close_instrument_position(
         self,
@@ -1670,19 +1551,9 @@ class OandaApi:
                 if type(short_units) == str and short_units == "NONE"
                 else {"shortUnits": str(short_units)}
             )
-        data.update(
-            {"longClientExtensions": long_client_extensions.as_dict()}
-            if long_client_extensions
-            else {}
-        )
-        data.update(
-            {"shortClientExtensions": short_client_extensions.as_dict()}
-            if short_client_extensions
-            else {}
-        )
-        return self._oanda_api_call(
-            "put", f"accounts/{self.account_id}/positions/{instrument}/close", data=data
-        )
+        data.update({"longClientExtensions": long_client_extensions.as_dict()} if long_client_extensions else {})
+        data.update({"shortClientExtensions": short_client_extensions.as_dict()} if short_client_extensions else {})
+        return self._oanda_api_call("put", f"accounts/{self.account_id}/positions/{instrument}/close", data=data)
 
     def get_transactions(
         self,
@@ -1711,9 +1582,7 @@ class OandaApi:
         params.update({"to": to_time} if to_time else {})
         params.update({"pageSize": str(page_size)} if page_size else {})
         params.update({"type": ",".join(transaction_type)} if transaction_type else {})
-        return self._oanda_api_call(
-            "get", f"accounts/{self.account_id}/transactions", params=params
-        )
+        return self._oanda_api_call("get", f"accounts/{self.account_id}/transactions", params=params)
 
     def get_transaction_details(self, transaction_id: id) -> dict:
         """
@@ -1723,13 +1592,9 @@ class OandaApi:
             transaction_id (int): The id of the transaction to retrieve details for
                 see TransactionID in oanda_guide.txt
         """
-        return self._oanda_api_call(
-            "get", f"accounts/{self.account_id}/transactions/{str(transaction_id)}"
-        )
+        return self._oanda_api_call("get", f"accounts/{self.account_id}/transactions/{str(transaction_id)}")
 
-    def get_transactions_in_range(
-        self, from_id: int, to_id: int, transaction_type: Optional[List[str]] = None
-    ) -> dict:
+    def get_transactions_in_range(self, from_id: int, to_id: int, transaction_type: Optional[List[str]] = None) -> dict:
         """
         Get a list of transactions given a range of transaction ids
 
@@ -1743,13 +1608,9 @@ class OandaApi:
         """
         params = {"from": str(from_id), "to": str(to_id)}
         params.update({"type": ",".join(transaction_type)} if transaction_type else {})
-        return self._oanda_api_call(
-            "get", f"accounts/{self.account_id}/transactions/idrange", params=params
-        )
+        return self._oanda_api_call("get", f"accounts/{self.account_id}/transactions/idrange", params=params)
 
-    def get_transactions_since_id(
-        self, from_id: int, transaction_type: Optional[List[str]] = None
-    ) -> dict:
+    def get_transactions_since_id(self, from_id: int, transaction_type: Optional[List[str]] = None) -> dict:
         """
         Get a list of transactions since a given transaction id
 
@@ -1761,9 +1622,7 @@ class OandaApi:
         """
         params = {"id": str(from_id)}
         params.update({"type": ",".join(transaction_type)} if transaction_type else {})
-        return self._oanda_api_call(
-            "get", f"accounts/{self.account_id}/transactions/sinceid", params=params
-        )
+        return self._oanda_api_call("get", f"accounts/{self.account_id}/transactions/sinceid", params=params)
 
     def transaction_stream(self):
         """
@@ -1779,9 +1638,7 @@ class OandaApi:
             # It will produce new transactions as transactions are made
         -------------
         """
-        stream = self._oanda_api_stream_call(
-            "get", f"accounts/{self.account_id}/transactions/stream"
-        )
+        stream = self._oanda_api_stream_call("get", f"accounts/{self.account_id}/transactions/stream")
         with stream as stream:
             for transaction in stream.iter_lines():
                 transaction = json.loads(transaction.decode("utf-8"))
@@ -1821,9 +1678,7 @@ class OandaApi:
         params.update({"dailyAlignment": str(daily_align)} if daily_align else {})
         params.update({"alignmentTimezone": timezone_align} if timezone_align else {})
         params.update({"weeklyAlignment": weekly_align} if weekly_align else {})
-        return self._oanda_api_call(
-            "get", f"accounts/{self.account_id}/candles/latest", params=params
-        )
+        return self._oanda_api_call("get", f"accounts/{self.account_id}/candles/latest", params=params)
 
     def get_instrument_pricing(
         self,
@@ -1845,9 +1700,7 @@ class OandaApi:
         params = {"instruments": ",".join(instruments)}
         params.update({"since": since} if since else {})
         params.update({"includeHomeConversion": str(convert)} if convert else {})
-        return self._oanda_api_call(
-            "get", f"accounts/{self.account_id}/pricing", params=params
-        )
+        return self._oanda_api_call("get", f"accounts/{self.account_id}/pricing", params=params)
 
     def pricing_stream(
         self,
@@ -1879,17 +1732,11 @@ class OandaApi:
         params = {"instruments": ",".join(instruments)}
         params.update({"snapshot": str(snapshot)} if snapshot else {})
         params.update({"includeHomeConversion": str(convert)} if convert else {})
-        stream = self._oanda_api_stream_call(
-            "get", f"accounts/{self.account_id}/pricing/stream", params=params
-        )
+        stream = self._oanda_api_stream_call("get", f"accounts/{self.account_id}/pricing/stream", params=params)
         with stream as stream:
             for price in stream.iter_lines():
                 price = json.loads(price.decode("utf-8"))
-                if (
-                    price.get("type")
-                    and price.get("type") == "PRICE"
-                    and price.get("tradeable")
-                ):
+                if price.get("type") and price.get("type") == "PRICE" and price.get("tradeable"):
                     price.pop("status")
                     yield price
 
@@ -1922,15 +1769,9 @@ class OandaApi:
             "Content-Type": "application/json",
             "Accept-Datetime-Format": self.datetime_format,
         }
-        response = getattr(requests, method)(
-            full_url, headers=headers, params=params, json=data
-        )
+        response = getattr(requests, method)(full_url, headers=headers, params=params, json=data)
         if response.status_code >= 300:
-            raise OandaError(
-                "HTTP Error {}: {}".format(
-                    response.status_code, response.json()["errorMessage"]
-                )
-            )
+            raise OandaError("HTTP Error {}: {}".format(response.status_code, response.json()["errorMessage"]))
         return response.json()
 
     def _oanda_api_stream_call(self, method, endpoint, params=None, data=None):
@@ -1943,13 +1784,7 @@ class OandaApi:
             "Content-Type": "application/json",
             "Accept-Datetime-Format": self.datetime_format,
         }
-        response = getattr(requests, method)(
-            full_url, headers=headers, params=params, json=data, stream=True
-        )
+        response = getattr(requests, method)(full_url, headers=headers, params=params, json=data, stream=True)
         if response.status_code >= 300:
-            raise OandaError(
-                "HTTP Error {}: {}".format(
-                    response.status_code, response.json()["errorMessage"]
-                )
-            )
+            raise OandaError("HTTP Error {}: {}".format(response.status_code, response.json()["errorMessage"]))
         return response

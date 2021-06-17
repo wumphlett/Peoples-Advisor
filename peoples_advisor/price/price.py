@@ -14,7 +14,7 @@ from peoples_advisor.settings import (
 )
 
 
-def get_pricing_gen(priority_queue: PriorityQueue, run_flag: Event, exit_flag: Event):
+def get_pricing_gen(priority_queue: PriorityQueue, exit_flag: Event):
     if BROKER == "OANDA":
         return OandaPricingGen(
             API_TOKEN,
@@ -24,7 +24,6 @@ def get_pricing_gen(priority_queue: PriorityQueue, run_flag: Event, exit_flag: E
             INSTRUMENTS,
             ACCOUNT_CURRENCY,
             priority_queue,
-            run_flag,
             exit_flag,
             SAVE_LIVE_AS_HISTORICAL,
         )

@@ -40,10 +40,7 @@ def get_all_current_prices():
     """
     data = requests.get(f"https://www.oanda.com/lfr/rates_all").text
     spreads = requests.get("https://www1.oanda.com/forex-trading/markets/recent").text
-    rc4_js = requests.get(
-        "https://www.oanda.com"
-        + re.search(r"/wandacache/rc4-[0-9a-f]+\.js", spreads).group()
-    ).text
+    rc4_js = requests.get("https://www.oanda.com" + re.search(r"/wandacache/rc4-[0-9a-f]+\.js", spreads).group()).text
     rc4_key = re.search('var key="[0-9a-f]+"', rc4_js).group()[9:-1]
     return _to_price_dict(_rc4decrypt(rc4_key, _hex_decode(data)))
 
@@ -51,9 +48,7 @@ def get_all_current_prices():
 def _hex_decode(hex_str):
     if len(hex_str) % 2:
         hex_str = "0" + hex_str
-    decode = [
-        chr(int(hex_str[(i * 2) : (i * 2) + 2], 16)) for i in range(len(hex_str) // 2)
-    ]
+    decode = [chr(int(hex_str[(i * 2) : (i * 2) + 2], 16)) for i in range(len(hex_str) // 2)]
     return "".join(decode)
 
 
@@ -72,11 +67,7 @@ def _rc4decrypt(key, cypher):
         i = (i + 1) % 256
         j = (j + key_schedule[i]) % 256
         key_schedule[i], key_schedule[j] = key_schedule[j], key_schedule[i]
-        c.append(
-            chr(
-                ord(cypher[k]) ^ key_schedule[(key_schedule[i] + key_schedule[j]) % 256]
-            )
-        )
+        c.append(chr(ord(cypher[k]) ^ key_schedule[(key_schedule[i] + key_schedule[j]) % 256]))
     return "".join(c)
 
 

@@ -100,9 +100,7 @@ class QuoteEvent(BaseEvent):
 
 
 class SignalEvent(BaseEvent):
-    def __init__(
-        self, instrument: str, time: datetime, side: str, info: Optional[dict] = None
-    ):
+    def __init__(self, instrument: str, time: datetime, side: str, info: Optional[dict] = None):
         """
         Creates a signal event to be passed along to the order generator.
 
@@ -127,9 +125,7 @@ class SignalEvent(BaseEvent):
     @staticmethod
     def from_repr(representation):
         args = representation.split(",")
-        return SignalEvent(
-            args[1], datetime.fromtimestamp(int(args[2])), args[3], eval(args[4])
-        )
+        return SignalEvent(args[1], datetime.fromtimestamp(int(args[2])), args[3], eval(args[4]))
 
 
 class OrderEvent(BaseEvent):
